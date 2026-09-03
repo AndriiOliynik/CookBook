@@ -313,10 +313,10 @@
     }
   }
 
-  function generateCustomId(targetArray = recipes) {
+  function generateCustomId() {
     const now = new Date();
     const datePrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-    const todayRecipes = targetArray.filter(r => r.id && r.id.toString().startsWith(datePrefix));
+    const todayRecipes = recipes.filter(r => r.id && r.id.toString().startsWith(datePrefix));
     return `${datePrefix}${String(todayRecipes.length + 1).padStart(4, '0')}`;
   }
 
@@ -326,6 +326,7 @@
     render();
   }
 
+  // Обработка paste без очистки полей
   document.addEventListener('paste', function (e) {
     const items = (e.clipboardData || e.originalEvent.clipboardData).items;
     for (let item of items) {
@@ -590,14 +591,14 @@
     a.click();
   }
 
-  // Перезапись при импорте JSON
+  // Імпорт JSON з вибором: замінити чи додати
   function importData(e) {
     const file = e.target.files[0];
     if (!file) return;
 
-    if (!confirm("Увага! Усі поточні рецепти будуть видалені та замінені даними з файлу. Продовжити?")) {
-      e.target.value = '';
-      return;
+    let replaceData = false;
+    if (recipes.length > 0) {
+      replaceData = confirm("Бажаєте ЗАМІНИТИ всі існуючі рецепти новими?\n\n[OK] — Видалити старі та записати нові\n[Скасувати] — Додати нові рецепти до існуючих");
     }
 
     const reader = new FileReader();
@@ -609,12 +610,16 @@
           else return;
         }
 
-        const newRecipesList = [];
+        if (replaceData) {
+          recipes = [];
+        }
+
+        let count = 0;
         imported.forEach(item => {
           const title = item.title || item.name || item.Title || '';
           if (title) {
-            newRecipesList.push({
-              id: generateCustomId(newRecipesList),
+            recipes.push({
+              id: generateCustomId(),
               title: title.toString().trim(),
               category: (item.category || item.Category || 'Загальні').toString().trim(),
               image: (item.image || item.img || '').toString().trim(),
@@ -622,19 +627,18 @@
               content: (item.content || item.text || '').toString().trim(),
               description: (item.description || item.notes || '').toString().trim()
             });
+            count++;
           }
         });
 
-        recipes = newRecipesList;
-        saveToStorage();
-        alert(`Імпорт успішний! Завантажено ${recipes.length} рецептів.`);
+        if (count > 0) { saveToStorage(); alert(`Оброблено ${count} рецептів!`); }
       } catch (err) { alert('Помилка імпорту.'); }
       e.target.value = '';
     };
     reader.readAsText(file);
   }
 
-  // Експорт Excel
+  // Экспорт в Excel
   function exportExcelData() {
     if (recipes.length === 0) {
       alert('Немає рецептів для експорту!');
@@ -670,14 +674,14 @@
     }
   }
 
-  // Перезапись при импорте Excel
+  // Импорт из Excel з вибором: замінити чи додати
   function importExcelData(e) {
     const file = e.target.files[0];
     if (!file || typeof XLSX === 'undefined') return;
 
-    if (!confirm("Увага! Усі поточні рецепти будуть видалені та замінені даними з файлу. Продовжити?")) {
-      e.target.value = '';
-      return;
+    let replaceData = false;
+    if (recipes.length > 0) {
+      replaceData = confirm("Бажаєте ЗАМІНИТИ всі існуючі рецепти новими?\n\n[OK] — Видалити старі та записати нові\n[Скасувати] — Додати нові рецепти до існуючих");
     }
 
     const reader = new FileReader();
@@ -688,7 +692,11 @@
         const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const excelRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
-        const newRecipesList = [];
+        if (replaceData) {
+          recipes = [];
+        }
+
+        let count = 0;
         excelRows.forEach(row => {
           const getVal = (keys) => {
             for (let key of keys) {
@@ -700,8 +708,8 @@
 
           const title = getVal(['title', 'назва', 'рецепт']);
           if (title) {
-            newRecipesList.push({
-              id: generateCustomId(newRecipesList),
+            recipes.push({
+              id: generateCustomId(),
               title: title.toString().trim(),
               category: getVal(['category', 'категорія']) || 'Загальні',
               image: getVal(['image', 'фото', 'image_base64']).toString().trim(),
@@ -709,12 +717,11 @@
               content: getVal(['content', 'текст', 'текст_рецепту']).toString().trim(),
               description: getVal(['description', 'нотатки', 'опис']).toString().trim()
             });
+            count++;
           }
         });
 
-        recipes = newRecipesList;
-        saveToStorage();
-        alert(`Імпорт успішний! Завантажено ${recipes.length} рецептів.`);
+        if (count > 0) { saveToStorage(); alert(`Імпортовано ${count} рецептів!`); }
       } catch (err) { alert('Помилка імпорту.'); }
       e.target.value = '';
     };
