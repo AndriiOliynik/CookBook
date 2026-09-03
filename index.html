@@ -4,109 +4,135 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Книга Рецептів</title>
-  <!-- Бібліотека для роботи з Excel (.xlsx) -->
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
-    /* Основні стилі */
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-    body { padding: 15px; background: #f4f4f9; color: #333; }
+    body { padding: 12px; background: #f4f4f9; color: #333; }
     
-    header { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 20px; 
-      flex-wrap: wrap;
-      gap: 10px;
-    }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    .social-container { display: flex; gap: 10px; }
+    .social-btn { color: #40E0D0; display: inline-flex; text-decoration: none; }
 
-    /* Соцмережі у шапці */
-    .social-container { display: flex; gap: 15px; align-items: center; }
-    .social-btn {
-      background: none; border: none; padding: 0; cursor: pointer;
-      color: #40E0D0; display: inline-flex; text-decoration: none;
-      transition: transform 0.2s ease, color 0.2s ease;
-    }
-    .social-btn:hover { color: #00CED1; transform: scale(1.15); }
-    .social-btn:active { transform: scale(0.95); }
-
-    /* Елементи управління */
-    .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-    input, select, button, textarea { padding: 10px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; width: 100%; }
+    .controls { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
+    input, select, button, textarea { padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; width: 100%; }
     button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
     button.btn-secondary { background: #007bff; }
     button.btn-excel { background: #1d6f42; }
     
-    button.btn-edit { background: #40E0D0; color: #fff; font-size: 16px; padding: 8px 12px; width: auto; }
-    button.btn-edit:hover { background: #00CED1; }
-    button.btn-danger { background: #dc3545; color: #fff; font-size: 16px; padding: 8px 12px; width: auto; }
-    button.btn-danger:hover { background: #c82333; }
-    button.btn-warning { background: #ffc107; color: #000; }
+    button.btn-edit { background: #40E0D0; color: #fff; padding: 6px 10px; width: auto; }
+    button.btn-danger { background: #dc3545; color: #fff; padding: 6px 10px; width: auto; }
     
-    .btn-group { display: flex; gap: 10px; flex-wrap: wrap; }
-    .btn-group button { flex: 1; min-width: 140px; }
+    .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn-group button { flex: 1; min-width: 110px; font-size: 12px; padding: 6px; }
     
     /* Сітка та картки */
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; }
-    .card { background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; }
-    .card-preview { width: 100%; height: 180px; object-fit: cover; background: #e9ecef; display: flex; align-items: center; justify-content: center; font-size: 40px; color: #6c757d; cursor: pointer; }
-    .card-body { padding: 15px; display: flex; flex-direction: column; gap: 10px; flex-grow: 1; }
-    .card h3 { font-size: 18px; color: #111; }
-    .badge { display: inline-block; background: #e0e0e0; padding: 3px 8px; border-radius: 5px; font-size: 12px; margin-right: 4px; margin-bottom: 4px; }
-    .media-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 6px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+    .card { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; }
+    
+    /* Зображення масштабується з вирівнюванням ЗВЕРХУ та ЗЛІВА */
+    .card-preview { 
+      width: 100%; 
+      height: 180px; 
+      object-fit: cover; 
+      object-position: top left; 
+      background: #e9ecef; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 30px; 
+      color: #6c757d; 
+      cursor: pointer; 
+    }
+    
+    .card-body { padding: 10px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
+    .card h3 { font-size: 16px; color: #111; }
+    .badge { display: inline-block; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 3px; }
+    .media-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 4px; }
     .media-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
-    .text-content { max-height: 120px; overflow-y: auto; white-space: pre-wrap; background: #fafafa; padding: 8px; border-radius: 6px; font-size: 13px; }
-    .form-group { display: flex; flex-direction: column; gap: 10px; background: white; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
-    .card-actions { display: flex; gap: 10px; margin-top: auto; align-items: center; }
+    
+    /* Адаптивний блок тексту рецепту */
+    .text-content { 
+      flex-grow: 1; 
+      min-height: 40px; 
+      max-height: 250px; 
+      overflow-y: auto; 
+      white-space: pre-wrap; 
+      background: #fafafa; 
+      padding: 6px; 
+      border-radius: 4px; 
+      font-size: 12px; 
+      border: 1px solid #eee; 
+    }
+    .notes-content { 
+      font-size: 12px; 
+      color: #555; 
+      background: #fffbe6; 
+      padding: 6px; 
+      border-radius: 4px; 
+      border: 1px dashed #ffe58f; 
+      margin-top: 2px; 
+      max-height: 100px;
+      overflow-y: auto;
+    }
 
-    .social-link { display: inline-flex; align-items: center; gap: 8px; font-weight: bold; text-decoration: none; padding: 8px 12px; border-radius: 6px; font-size: 14px; width: fit-content; }
+    /* Компактний блок додавання */
+    .form-group { background: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e0e0e0; }
+    .card-actions { display: flex; gap: 6px; margin-top: auto; align-items: center; padding-top: 4px; }
+
+    .social-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: bold; text-decoration: none; padding: 6px; border-radius: 4px; font-size: 12px; width: 100%; }
     .social-link.fb { background: #e7f3ff; color: #1877f2; }
     .social-link.insta { background: #fdf0f5; color: #e4405f; }
-    .social-link.tiktok { background: #f1f1f1; color: #000000; }
+    .social-link.tiktok { background: #f1f1f1; color: #000; }
     .social-link.yt { background: #ffe6e6; color: #ff0000; }
-    .social-link.image-btn { background: #e6f9f7; color: #008b8b; width: 100%; justify-content: center; }
+    .social-link.image-btn { background: #e6f9f7; color: #008b8b; }
 
-    .file-upload-box { border: 1px dashed #007bff; padding: 10px; border-radius: 8px; background: #f0f7ff; text-align: center; }
+    /* Зона завантаження/вставки з буфера */
+    .drop-zone {
+      border: 1px dashed #007bff;
+      border-radius: 6px;
+      padding: 6px;
+      background: #f0f7ff;
+      text-align: center;
+      cursor: pointer;
+      font-size: 12px;
+      color: #0056b3;
+      transition: background 0.2s;
+    }
+    .drop-zone:hover { background: #e1f0ff; }
+    .preview-thumbnail { max-height: 80px; max-width: 100%; margin-top: 5px; border-radius: 4px; display: none; object-fit: contain; }
 
     /* Модальні вікна */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; padding: 15px; }
-    .modal-content { background: white; padding: 20px; border-radius: 10px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
+    .modal-content { background: white; padding: 15px; border-radius: 8px; width: 100%; max-width: 450px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
     
-    /* Модальне вікно перегляду скріншотів на весь екран */
-    .image-viewer-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 2000; padding: 10px; }
-    .image-viewer-modal img { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 8px; }
-    .close-viewer { position: absolute; top: 15px; right: 20px; color: white; font-size: 30px; font-weight: bold; cursor: pointer; }
+    .image-viewer-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 2000; padding: 5px; }
+    .image-viewer-modal img { max-width: 100%; max-height: 95vh; object-fit: contain; }
+    .close-viewer { position: absolute; top: 10px; right: 15px; color: white; font-size: 28px; cursor: pointer; }
   </style>
 </head>
 <body>
 
 <header>
-  <h1>📖 Книга Рецептів</h1>
+  <h2 style="font-size: 20px;">📖 Книга Рецептів</h2>
   <div class="social-container">
     <a href="https://facebook.com" target="_blank" class="social-btn" aria-label="Facebook">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
-      </svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path></svg>
     </a>
     <a href="https://instagram.com" target="_blank" class="social-btn" aria-label="Instagram">
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
-        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
-        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
-      </svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path></svg>
     </a>
   </div>
 </header>
 
 <div class="controls">
-  <input type="text" id="searchInput" placeholder="🔍 Пошук по назві, тегам чи тексту..." oninput="render()">
+  <input type="text" id="searchInput" placeholder="🔍 Пошук..." oninput="render()">
   <select id="categoryFilter" onchange="render()">
     <option value="">Усі категорії</option>
   </select>
   <div class="btn-group">
-    <button class="btn-secondary" onclick="exportData()">💾 Експорт JSON</button>
-    <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">📂 Імпорт JSON</button>
-    <button class="btn-excel" onclick="document.getElementById('excelInput').click()">📊 Імпорт Excel (.xlsx)</button>
+    <button class="btn-secondary" onclick="exportData()">💾 JSON</button>
+    <button class="btn-secondary" onclick="document.getElementById('fileInput').click()">📂 JSON</button>
+    <button class="btn-excel" onclick="document.getElementById('excelInput').click()">📊 Excel</button>
     
     <input type="file" id="fileInput" accept=".json" style="display:none" onchange="importData(event)">
     <input type="file" id="excelInput" accept=".xlsx, .xls, .csv" style="display:none" onchange="importExcelData(event)">
@@ -114,35 +140,36 @@
 </div>
 
 <!-- Форма додавання -->
-<details class="form-group">
-  <summary><b>➕ Додати новий рецепт / скріншот</b></summary>
-  <form id="recipeForm" onsubmit="addRecipe(event)" style="display: flex; flex-direction: column; gap: 10px; margin-top: 10px;">
-    <input type="text" id="title" placeholder="Назва рецепту" required>
-    <input type="text" id="category" placeholder="Категорія (напр. Випічка, Вибране)" required>
-    <input type="text" id="tags" placeholder="Теги через кому (напр. скріншот, салат)">
+<details class="form-group" id="addDetails">
+  <summary style="cursor: pointer; font-weight: bold; font-size: 14px;">➕ Додати рецепт / скріншот</summary>
+  <form id="recipeForm" onsubmit="addRecipe(event)" style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+    <input type="text" id="title" placeholder="Назва рецепту *" required>
     
-    <!-- Вибір типу вмісту -->
-    <select id="type">
-      <option value="image">📱 Зображення / Скріншот з телефону</option>
-      <option value="text">Текстовий рецепт</option>
-      <option value="youtube">YouTube Посилання</option>
-      <option value="tiktok">TikTok Посилання</option>
-      <option value="facebook">Facebook Посилання</option>
-      <option value="instagram">Instagram Посилання</option>
-    </select>
-    
-    <!-- Блок завантаження скріншота / фото -->
-    <div class="file-upload-box">
-      <label style="display:block; margin-bottom: 5px; font-weight:bold;">📲 Виберіть скріншот або фото з телефону:</label>
-      <input type="file" id="imageFile" accept="image/*" onchange="handleImageUpload(event, 'add')">
-      <div style="margin: 5px 0; font-size: 12px; color: #666;">або вкажіть URL посилання на картинку:</div>
-      <input type="url" id="image" placeholder="https://example.com/image.jpg">
+    <div style="display: flex; gap: 6px;">
+      <input type="text" id="category" placeholder="Категорія" style="flex:1;">
+      <select id="type" style="flex:1;">
+        <option value="image">📱 Скріншот / Фото</option>
+        <option value="text">📝 Текст</option>
+        <option value="youtube">YouTube</option>
+        <option value="tiktok">TikTok</option>
+        <option value="facebook">Facebook</option>
+        <option value="instagram">Instagram</option>
+      </select>
     </div>
 
-    <input type="url" id="link" placeholder="🔗 Джерело / Посилання (необов'язково)">
-    <textarea id="content" placeholder="📝 Текст рецепту (необов'язково)" rows="3"></textarea>
-    <textarea id="description" placeholder="Короткі нотатки" rows="2"></textarea>
-    <button type="submit">Зберегти рецепт</button>
+    <!-- Зона вставки з буфера / файлу -->
+    <div class="drop-zone" onclick="document.getElementById('imageFile').click()">
+      📋 <b>Вставте скріншот (Ctrl+V)</b> або натисніть для вибору
+      <input type="file" id="imageFile" accept="image/*" style="display:none" onchange="handleImageUpload(event, 'add')">
+      <img id="addPreviewThumb" class="preview-thumbnail" alt="Прев'ю">
+    </div>
+
+    <input type="url" id="image" placeholder="або URL картинки (https://...)" style="font-size: 11px; padding: 4px 8px;">
+    <input type="url" id="link" placeholder="🔗 Джерело / Посилання">
+    <textarea id="content" placeholder="📝 Текст рецепту / інгредієнти" rows="2"></textarea>
+    <textarea id="description" placeholder="📌 Нотатки / Примітки" rows="2"></textarea>
+    <input type="text" id="tags" placeholder="Теги через кому (напр. салат, швидкий)">
+    <button type="submit" style="margin-top: 4px;">Зберегти</button>
   </form>
 </details>
 
@@ -151,41 +178,48 @@
 <!-- Модальне вікно редагування -->
 <div id="editModal" class="modal">
   <div class="modal-content">
-    <h2>✏️ Редагування рецепта</h2>
-    <form id="editForm" onsubmit="saveEdit(event)" style="display: flex; flex-direction: column; gap: 10px;">
+    <h3 style="font-size: 16px;">✏️ Редагувати рецепт</h3>
+    <form id="editForm" onsubmit="saveEdit(event)" style="display: flex; flex-direction: column; gap: 6px;">
       <input type="hidden" id="editId">
-      <input type="text" id="editTitle" placeholder="Назва рецепту" required>
-      <input type="text" id="editCategory" placeholder="Категорія" required>
-      <input type="text" id="editTags" placeholder="Теги через кому">
-      <select id="editType">
-        <option value="image">📱 Зображення / Скріншот</option>
-        <option value="text">Текстовий рецепт</option>
-        <option value="youtube">YouTube Посилання</option>
-        <option value="tiktok">TikTok Посилання</option>
-        <option value="facebook">Facebook Посилання</option>
-        <option value="instagram">Instagram Посилання</option>
-      </select>
+      <input type="text" id="editTitle" placeholder="Назва рецепту *" required>
       
-      <div class="file-upload-box">
-        <label style="display:block; margin-bottom: 5px; font-weight:bold;">🖼️ Змінити скріншот / фото:</label>
-        <input type="file" id="editImageFile" accept="image/*" onchange="handleImageUpload(event, 'edit')">
-        <div style="margin: 5px 0; font-size: 12px; color: #666;">або URL посилання:</div>
-        <input type="url" id="editImage" placeholder="https://example.com/image.jpg">
-        <button type="button" class="btn-warning" style="margin-top: 8px; font-size: 12px; padding: 5px; width: 100%;" onclick="removeImage()">🗑️ Видалити фото</button>
+      <div style="display: flex; gap: 6px;">
+        <input type="text" id="editCategory" placeholder="Категорія" style="flex:1;">
+        <select id="editType" style="flex:1;">
+          <option value="image">📱 Скріншот / Фото</option>
+          <option value="text">📝 Текст</option>
+          <option value="youtube">YouTube</option>
+          <option value="tiktok">TikTok</option>
+          <option value="facebook">Facebook</option>
+          <option value="instagram">Instagram</option>
+        </select>
+      </div>
+      
+      <div class="drop-zone" onclick="document.getElementById('editImageFile').click()">
+        📋 <b>Замінити скріншот (Ctrl+V)</b> або обрати файл
+        <input type="file" id="editImageFile" accept="image/*" style="display:none" onchange="handleImageUpload(event, 'edit')">
+        <img id="editPreviewThumb" class="preview-thumbnail" alt="Прев'ю">
+      </div>
+
+      <div style="display: flex; gap: 4px;">
+        <input type="url" id="editImage" placeholder="URL картинки" style="font-size: 11px; padding: 4px; flex:1;">
+        <button type="button" style="background:#ffc107; color:#000; font-size:11px; width:auto; padding:0 6px;" onclick="removeImage()">🗑️ Стерти</button>
       </div>
 
       <input type="url" id="editLink" placeholder="🔗 Посилання (URL)">
-      <textarea id="editContent" placeholder="📝 Текст рецепту" rows="3"></textarea>
-      <textarea id="editDescription" placeholder="Короткі нотатки" rows="2"></textarea>
-      <div style="display: flex; gap: 10px;">
-        <button type="submit" style="flex: 1;">Зберегти зміни</button>
+      <textarea id="editContent" placeholder="📝 Текст рецепту" rows="2"></textarea>
+      <textarea id="editDescription" placeholder="📌 Нотатки / Примітки" rows="2"></textarea>
+      <input type="text" id="editTags" placeholder="Теги через кому">
+      
+      <div style="display: flex; gap: 6px; margin-top: 4px;">
+        <button type="submit" style="flex: 1;">Зберегти</button>
         <button type="button" class="btn-danger" style="flex: 1;" onclick="closeEditModal()">Скасувати</button>
       </div>
     </form>
   </div>
 </div>
 
-<!-- Модальне вікно для повноекранного перегляду скріншота -->
+<!-- Повноекранний перегляд скріншота -->
 <div id="imageViewer" class="image-viewer-modal" onclick="closeImageViewer()">
   <span class="close-viewer">&times;</span>
   <img id="fullImage" src="" alt="Скріншот рецепта">
@@ -197,18 +231,11 @@
   let tempEditBase64 = "";
   let isImageRemoved = false;
 
-  // 🆔 Формування ID типу 202609030001
   function generateCustomId() {
     const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, '0');
-    const day = String(now.getDate()).padStart(2, '0');
-    const datePrefix = `${year}${month}${day}`;
-
+    const datePrefix = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
     const todayRecipes = recipes.filter(r => r.id && r.id.toString().startsWith(datePrefix));
-    const nextNumber = String(todayRecipes.length + 1).padStart(4, '0');
-
-    return `${datePrefix}${nextNumber}`;
+    return `${datePrefix}${String(todayRecipes.length + 1).padStart(4, '0')}`;
   }
 
   function saveToStorage() {
@@ -217,17 +244,36 @@
     render();
   }
 
-  // 📲 Завантаження та стиснення зображень/скріншотів
+  // Обробка вставки з буфера обміну (Ctrl+V / Paste)
+  document.addEventListener('paste', function (e) {
+    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+    for (let item of items) {
+      if (item.type.indexOf('image') !== -1) {
+        const file = item.getAsFile();
+        const mode = document.getElementById('editModal').style.display === 'flex' ? 'edit' : 'add';
+        
+        if (mode === 'add') {
+          document.getElementById('addDetails').open = true;
+        }
+
+        processImageFile(file, mode);
+        break;
+      }
+    }
+  });
+
   function handleImageUpload(event, mode) {
     const file = event.target.files[0];
-    if (!file) return;
+    if (file) processImageFile(file, mode);
+  }
 
+  function processImageFile(file, mode) {
     const reader = new FileReader();
     reader.onload = function(e) {
       const img = new Image();
       img.onload = function() {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1200; // Підвищена чіткість для читання тексту на скріншоті
+        const MAX_WIDTH = 1200;
         const scaleSize = MAX_WIDTH / img.width;
         
         if (img.width > MAX_WIDTH) {
@@ -240,15 +286,19 @@
 
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        
-        // Стискаємо в JPEG з якістю 75%
         const compressedBase64 = canvas.toDataURL('image/jpeg', 0.75);
 
         if (mode === 'add') {
           tempAddBase64 = compressedBase64;
+          const thumb = document.getElementById('addPreviewThumb');
+          thumb.src = compressedBase64;
+          thumb.style.display = 'block';
         } else {
           tempEditBase64 = compressedBase64;
           isImageRemoved = false;
+          const thumb = document.getElementById('editPreviewThumb');
+          thumb.src = compressedBase64;
+          thumb.style.display = 'block';
         }
       };
       img.src = e.target.result;
@@ -260,38 +310,28 @@
     tempEditBase64 = "";
     document.getElementById('editImage').value = "";
     document.getElementById('editImageFile').value = "";
+    document.getElementById('editPreviewThumb').style.display = "none";
     isImageRemoved = true;
-    alert("Зображення позначено на видалення.");
   }
 
-  // 🔍 Повноекранний перегляд скріншота
   function openImageViewer(imgSrc) {
-    const viewer = document.getElementById('imageViewer');
-    const fullImg = document.getElementById('fullImage');
-    fullImg.src = imgSrc;
-    viewer.style.display = 'flex';
+    document.getElementById('fullImage').src = imgSrc;
+    document.getElementById('imageViewer').style.display = 'flex';
   }
 
   function closeImageViewer() {
     document.getElementById('imageViewer').style.display = 'none';
   }
 
-  // ➕ Додавання рецепта
   function addRecipe(e) {
     e.preventDefault();
     const urlImage = document.getElementById('image').value.trim();
     const finalImage = tempAddBase64 || urlImage;
-
-    // Перевірка: якщо вибрано тип "Зображення/Скріншот", але його не додано
-    if (document.getElementById('type').value === 'image' && !finalImage) {
-      alert('⚠️ Будь ласка, завантажте скріншот або вкажіть URL картинки!');
-      return;
-    }
     
     const newRecipe = {
       id: generateCustomId(),
       title: document.getElementById('title').value,
-      category: document.getElementById('category').value.trim(),
+      category: document.getElementById('category').value.trim() || 'Загальні',
       tags: document.getElementById('tags').value.split(',').map(t => t.trim()).filter(t => t),
       type: document.getElementById('type').value,
       image: finalImage,
@@ -302,7 +342,9 @@
     
     recipes.push(newRecipe);
     saveToStorage();
+    
     document.getElementById('recipeForm').reset();
+    document.getElementById('addPreviewThumb').style.display = 'none';
     tempAddBase64 = "";
   }
 
@@ -323,6 +365,14 @@
     document.getElementById('editContent').value = recipe.content || '';
     document.getElementById('editDescription').value = recipe.description || '';
 
+    const editThumb = document.getElementById('editPreviewThumb');
+    if (recipe.image) {
+      editThumb.src = recipe.image;
+      editThumb.style.display = 'block';
+    } else {
+      editThumb.style.display = 'none';
+    }
+
     document.getElementById('editModal').style.display = 'flex';
   }
 
@@ -339,8 +389,8 @@
 
     if (recipeIndex !== -1) {
       const urlImage = document.getElementById('editImage').value.trim();
-      
       let finalImage = "";
+      
       if (!isImageRemoved) {
         finalImage = tempEditBase64 || urlImage || recipes[recipeIndex].image || "";
       }
@@ -348,8 +398,8 @@
       recipes[recipeIndex] = {
         id: id,
         title: document.getElementById('editTitle').value,
-        category: document.getElementById('editCategory').value.trim(),
-        tags: document.getElementById('tags').value ? document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(t => t) : [],
+        category: document.getElementById('editCategory').value.trim() || 'Загальні',
+        tags: document.getElementById('editTags').value ? document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(t => t) : [],
         type: document.getElementById('editType').value,
         image: finalImage,
         link: document.getElementById('editLink').value.trim(),
@@ -397,11 +447,10 @@
     if (type === 'facebook') return `📘`;
     if (type === 'instagram') return `📷`;
     if (type === 'tiktok') return '🎵';
-    if (type === 'image') return '📲';
+    if (type === 'image') return '📱';
     return '🍳';
   }
 
-  // 🖥️ Рендеринг картка-рецептів
   function render() {
     const search = document.getElementById('searchInput').value.toLowerCase();
     const category = document.getElementById('categoryFilter').value;
@@ -411,8 +460,8 @@
     const filtered = recipes.filter(r => {
       const matchesCategory = !category || r.category === category;
       const matchesSearch = r.title.toLowerCase().includes(search) || 
-                            (r.description && r.description.toLowerCase().includes(search)) ||
                             (r.content && r.content.toLowerCase().includes(search)) ||
+                            (r.description && r.description.toLowerCase().includes(search)) ||
                             (r.tags && r.tags.some(t => t.toLowerCase().includes(search)));
       return matchesCategory && matchesSearch;
     });
@@ -423,7 +472,6 @@
       
       const imgUrl = getPreviewImage(r);
       
-      // По кліку на прев'ю скріншот відкривається на весь екран
       let previewHtml = imgUrl 
         ? `<img src="${imgUrl}" class="card-preview" alt="${r.title}" loading="lazy" onclick="openImageViewer('${imgUrl}')">`
         : `<div class="card-preview">${getPlaceholderSVG(r.type)}</div>`;
@@ -436,29 +484,30 @@
       if (r.link) {
         if (r.type === 'youtube') {
           const ytId = getYouTubeId(r.link);
-          mediaHtml += ytId ? `<div class="media-container" style="margin-top:8px;"><iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe></div>` 
-                            : `<a href="${r.link}" target="_blank" class="social-link yt">▶️ Дивитися на YouTube</a>`;
+          mediaHtml += ytId ? `<div class="media-container" style="margin-top:4px;"><iframe src="https://www.youtube.com/embed/${ytId}" allowfullscreen></iframe></div>` 
+                            : `<a href="${r.link}" target="_blank" class="social-link yt">▶️ YouTube</a>`;
         } else if (r.type === 'tiktok') {
-          mediaHtml += `<a href="${r.link}" target="_blank" class="social-link tiktok">🎵 Відкрити в TikTok</a>`;
+          mediaHtml += `<a href="${r.link}" target="_blank" class="social-link tiktok">🎵 TikTok</a>`;
         } else if (r.type === 'facebook') {
-          mediaHtml += `<a href="${r.link}" target="_blank" class="social-link fb">📘 Відкрити у Facebook</a>`;
+          mediaHtml += `<a href="${r.link}" target="_blank" class="social-link fb">📘 Facebook</a>`;
         } else if (r.type === 'instagram') {
-          mediaHtml += `<a href="${r.link}" target="_blank" class="social-link insta">📷 Відкрити в Instagram</a>`;
+          mediaHtml += `<a href="${r.link}" target="_blank" class="social-link insta">📷 Instagram</a>`;
         } else {
-          mediaHtml += `<a href="${r.link}" target="_blank" class="social-link">🌐 Перейти за посиланням</a>`;
+          mediaHtml += `<a href="${r.link}" target="_blank" class="social-link">🌐 Перейти</a>`;
         }
       }
 
       let contentHtml = r.content ? `<div class="text-content">${r.content}</div>` : '';
+      let notesHtml = r.description ? `<div class="notes-content">📎 ${r.description}</div>` : '';
 
       card.innerHTML = `
         ${previewHtml}
         <div class="card-body">
           <h3>${r.title}</h3>
           <div><span class="badge">${r.category}</span></div>
-          ${r.description ? `<p><small>${r.description}</small></p>` : ''}
           ${mediaHtml}
           ${contentHtml}
+          ${notesHtml}
           <div>${r.tags ? r.tags.map(t => `<span class="badge">#${t}</span>`).join(' ') : ''}</div>
           <div class="card-actions">
             <button class="btn-edit" title="Редагувати" onclick="openEditModal('${r.id}')">✏️</button>
@@ -486,15 +535,12 @@
     reader.onload = function(evt) {
       try {
         let imported = JSON.parse(evt.target.result);
-
         if (!Array.isArray(imported)) {
           if (typeof imported === 'object' && imported !== null) imported = [imported];
-          else { alert('❌ Некоректний JSON.'); return; }
+          else return;
         }
 
         let count = 0;
-        const validTypes = ['youtube', 'tiktok', 'facebook', 'instagram', 'image', 'text'];
-
         imported.forEach(item => {
           const title = item.title || item.name || item.Title || '';
           if (title) {
@@ -503,26 +549,18 @@
               title: title.toString().trim(),
               category: (item.category || item.Category || 'Загальні').toString().trim(),
               tags: Array.isArray(item.tags) ? item.tags : (item.tags ? item.tags.toString().split(',').map(t => t.trim()).filter(t => t) : []),
-              type: validTypes.includes((item.type || '').toLowerCase()) ? item.type.toLowerCase() : 'image',
-              image: (item.image || item.img || item.photo || '').toString().trim(),
+              type: item.type || 'image',
+              image: (item.image || item.img || '').toString().trim(),
               link: (item.link || item.url || '').toString().trim(),
-              content: (item.content || item.text || item.instructions || '').toString().trim(),
+              content: (item.content || item.text || '').toString().trim(),
               description: (item.description || item.notes || '').toString().trim()
             });
             count++;
           }
         });
 
-        if (count > 0) {
-          saveToStorage();
-          alert(`✅ Успішно додано ${count} рецептів/скріншотів!`);
-        } else {
-          alert('⚠️ У файлі не знайдено відповідних рецептів.');
-        }
-
-      } catch (err) {
-        alert('❌ Помилка зчитування JSON файлу.');
-      }
+        if (count > 0) { saveToStorage(); alert(`Додано ${count} рецептів!`); }
+      } catch (err) { alert('Помилка імпорту.'); }
       e.target.value = '';
     };
     reader.readAsText(file);
@@ -530,25 +568,17 @@
 
   function importExcelData(e) {
     const file = e.target.files[0];
-    if (!file) return;
-
-    if (typeof XLSX === 'undefined') {
-      alert('❌ Бібліотеку Excel не завантажено.');
-      return;
-    }
+    if (!file || typeof XLSX === 'undefined') return;
 
     const reader = new FileReader();
     reader.onload = function(evt) {
       try {
         const data = new Uint8Array(evt.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
-        const firstSheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[firstSheetName];
+        const worksheet = workbook.Sheets[workbook.SheetNames[0]];
         const excelRows = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
 
         let count = 0;
-        const validTypes = ['youtube', 'tiktok', 'facebook', 'instagram', 'image', 'text'];
-
         excelRows.forEach(row => {
           const getVal = (keys) => {
             for (let key of keys) {
@@ -558,38 +588,25 @@
             return '';
           };
 
-          const title = getVal(['title', 'назва', 'рецепт', 'заголовок']);
-          const category = getVal(['category', 'категорія']) || 'Загальні';
-          const tagsRaw = getVal(['tags', 'теги', 'мітки']);
-          const type = getVal(['type', 'тип']).toString().toLowerCase();
-          const image = getVal(['image', 'картинка', 'фото', 'зображення']);
-          const link = getVal(['link', 'посилання', 'url']);
-          const content = getVal(['content', 'вміст', 'текст']);
-          const description = getVal(['description', 'опис']);
-
+          const title = getVal(['title', 'назва', 'рецепт']);
           if (title) {
             recipes.push({
               id: generateCustomId(),
               title: title.toString().trim(),
-              category: category.toString().trim(),
-              tags: tagsRaw ? tagsRaw.toString().split(',').map(t => t.trim()).filter(t => t) : [],
-              type: validTypes.includes(type) ? type : 'image',
-              image: image.toString().trim(),
-              link: link.toString().trim(),
-              content: content.toString().trim(),
-              description: description.toString().trim()
+              category: getVal(['category', 'категорія']) || 'Загальні',
+              tags: getVal(['tags', 'теги']) ? getVal(['tags', 'теги']).toString().split(',').map(t => t.trim()).filter(t => t) : [],
+              type: getVal(['type', 'тип']).toString().toLowerCase() || 'image',
+              image: getVal(['image', 'фото']).toString().trim(),
+              link: getVal(['link', 'посилання']).toString().trim(),
+              content: getVal(['content', 'текст']).toString().trim(),
+              description: getVal(['description', 'нотатки', 'опис']).toString().trim()
             });
             count++;
           }
         });
 
-        if (count > 0) {
-          saveToStorage();
-          alert(`✅ Успішно імпортовано ${count} рецептів із Excel!`);
-        }
-      } catch (err) {
-        alert('❌ Помилка зчитання Excel-файлу.');
-      }
+        if (count > 0) { saveToStorage(); alert(`Імпортовано ${count} рецептів!`); }
+      } catch (err) { alert('Помилка імпорту.'); }
       e.target.value = '';
     };
     reader.readAsArrayBuffer(file);
