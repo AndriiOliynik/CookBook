@@ -2,52 +2,59 @@
 <html lang="uk">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Книга Рецептів</title>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: sans-serif; }
-    body { padding: 12px; background: #f4f4f9; color: #333; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    body { padding: 10px; background: #f4f4f9; color: #333; -webkit-tap-highlight-color: transparent; }
     
-    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .social-container { display: flex; gap: 10px; }
-    .social-btn { color: #40E0D0; display: inline-flex; text-decoration: none; }
+    .social-btn { color: #40E0D0; display: inline-flex; text-decoration: none; padding: 4px; }
 
-    .controls { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
-    input, select, button, textarea { padding: 8px 10px; border: 1px solid #ccc; border-radius: 6px; font-size: 13px; width: 100%; }
-    button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+    .controls { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+    input, select, button, textarea { padding: 10px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; width: 100%; outline: none; }
+    input:focus, select:focus, textarea:focus { border-color: #40E0D0; }
+    
+    button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
+    button:active { opacity: 0.85; }
     button.btn-secondary { background: #007bff; }
     button.btn-excel { background: #1d6f42; }
     
-    button.btn-edit { background: #40E0D0; color: #fff; padding: 6px 10px; width: auto; }
-    button.btn-danger { background: #dc3545; color: #fff; padding: 6px 10px; width: auto; }
-    
+    button.btn-edit { background: #40E0D0; color: #fff; padding: 6px 12px; width: 100%; min-height: 36px; border-radius: 6px; font-size: 13px; }
+    button.btn-danger { background: #dc3545; color: #fff; }
+    button.btn-icon-danger { background: #fff0f0; color: #dc3545; border: 1px solid #ffcdd2; width: 36px; height: 36px; min-height: 36px; border-radius: 50%; padding: 0; font-size: 16px; cursor: pointer; }
+    button.btn-icon-danger:active { background: #ffe0e0; }
+
     .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
-    .btn-group button { flex: 1; min-width: 110px; font-size: 12px; padding: 6px; }
+    .btn-group button { flex: 1; min-width: 90px; font-size: 12px; min-height: 36px; padding: 6px; }
     
     /* Сітка та картки */
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
-    .card { background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.08); display: flex; flex-direction: column; overflow: hidden; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+    .card { background: white; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #edf2f7; }
     
-    /* Зображення масштабується з вирівнюванням ЗВЕРХУ та ЗЛІВА */
     .card-preview { 
       width: 100%; 
-      height: 180px; 
+      height: 190px; 
       object-fit: cover; 
       object-position: top left; 
       background: #e9ecef; 
       display: flex; 
       align-items: center; 
       justify-content: center; 
-      font-size: 30px; 
+      font-size: 32px; 
       color: #6c757d; 
       cursor: pointer; 
     }
     
-    .card-body { padding: 10px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
-    .card h3 { font-size: 16px; color: #111; }
-    .badge { display: inline-block; background: #e0e0e0; padding: 2px 6px; border-radius: 4px; font-size: 11px; margin-right: 3px; }
-    .media-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 4px; }
+    .card-body { padding: 12px; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
+    
+    /* Збільшена та виразніша назва рецепту */
+    .card h3 { font-size: 18px; font-weight: 700; color: #1a202c; line-height: 1.3; }
+    
+    .badge { display: inline-block; background: #edf2f7; color: #4a5568; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; margin-right: 4px; margin-bottom: 4px; }
+    .media-container { position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 6px; }
     .media-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
     
     /* Адаптивний блок тексту рецепту */
@@ -57,57 +64,61 @@
       max-height: 250px; 
       overflow-y: auto; 
       white-space: pre-wrap; 
-      background: #fafafa; 
-      padding: 6px; 
-      border-radius: 4px; 
-      font-size: 12px; 
-      border: 1px solid #eee; 
+      background: #f8fafc; 
+      padding: 8px; 
+      border-radius: 6px; 
+      font-size: 13px; 
+      line-height: 1.4;
+      border: 1px solid #e2e8f0; 
+      -webkit-overflow-scrolling: touch;
     }
     .notes-content { 
       font-size: 12px; 
-      color: #555; 
-      background: #fffbe6; 
-      padding: 6px; 
-      border-radius: 4px; 
-      border: 1px dashed #ffe58f; 
-      margin-top: 2px; 
+      color: #744210; 
+      background: #fffbea; 
+      padding: 8px; 
+      border-radius: 6px; 
+      border: 1px dashed #fbd38d; 
       max-height: 100px;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
-    /* Компактний блок додавання */
-    .form-group { background: white; padding: 10px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #e0e0e0; }
-    .card-actions { display: flex; gap: 6px; margin-top: auto; align-items: center; padding-top: 4px; }
+    /* Форма додавання */
+    .form-group { background: white; padding: 12px; border-radius: 12px; margin-bottom: 12px; border: 1px solid #e2e8f0; }
+    .card-actions { display: flex; gap: 6px; margin-top: auto; padding-top: 6px; }
 
-    .social-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: bold; text-decoration: none; padding: 6px; border-radius: 4px; font-size: 12px; width: 100%; }
+    .social-link { display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 600; text-decoration: none; padding: 8px; border-radius: 6px; font-size: 12px; width: 100%; }
     .social-link.fb { background: #e7f3ff; color: #1877f2; }
     .social-link.insta { background: #fdf0f5; color: #e4405f; }
     .social-link.tiktok { background: #f1f1f1; color: #000; }
     .social-link.yt { background: #ffe6e6; color: #ff0000; }
     .social-link.image-btn { background: #e6f9f7; color: #008b8b; }
 
-    /* Зона завантаження/вставки з буфера */
+    /* Зона завантаження */
     .drop-zone {
       border: 1px dashed #007bff;
-      border-radius: 6px;
-      padding: 6px;
+      border-radius: 8px;
+      padding: 10px;
       background: #f0f7ff;
       text-align: center;
       cursor: pointer;
       font-size: 12px;
       color: #0056b3;
-      transition: background 0.2s;
     }
-    .drop-zone:hover { background: #e1f0ff; }
-    .preview-thumbnail { max-height: 80px; max-width: 100%; margin-top: 5px; border-radius: 4px; display: none; object-fit: contain; }
+    .drop-zone:active { background: #e1f0ff; }
+    .preview-thumbnail { max-height: 90px; max-width: 100%; margin-top: 6px; border-radius: 6px; display: none; object-fit: contain; }
 
     /* Модальні вікна */
-    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; padding: 10px; }
-    .modal-content { background: white; padding: 15px; border-radius: 8px; width: 100%; max-width: 450px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; padding: 12px; backdrop-filter: blur(2px); }
+    .modal-content { background: white; padding: 16px; border-radius: 12px; width: 100%; max-width: 450px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; position: relative; }
     
-    .image-viewer-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); justify-content: center; align-items: center; z-index: 2000; padding: 5px; }
+    .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px; }
+    .modal-header h3 { font-size: 17px; color: #1a202c; }
+
+    .image-viewer-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); justify-content: center; align-items: center; z-index: 2000; padding: 5px; }
     .image-viewer-modal img { max-width: 100%; max-height: 95vh; object-fit: contain; }
-    .close-viewer { position: absolute; top: 10px; right: 15px; color: white; font-size: 28px; cursor: pointer; }
+    .close-viewer { position: absolute; top: 12px; right: 18px; color: white; font-size: 32px; cursor: pointer; font-weight: bold; }
   </style>
 </head>
 <body>
@@ -141,8 +152,8 @@
 
 <!-- Форма додавання -->
 <details class="form-group" id="addDetails">
-  <summary style="cursor: pointer; font-weight: bold; font-size: 14px;">➕ Додати рецепт / скріншот</summary>
-  <form id="recipeForm" onsubmit="addRecipe(event)" style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+  <summary style="cursor: pointer; font-weight: bold; font-size: 14px; padding: 4px 0;">➕ Додати рецепт / скріншот</summary>
+  <form id="recipeForm" onsubmit="addRecipe(event)" style="display: flex; flex-direction: column; gap: 8px; margin-top: 10px;">
     <input type="text" id="title" placeholder="Назва рецепту *" required>
     
     <div style="display: flex; gap: 6px;">
@@ -159,14 +170,14 @@
 
     <!-- Зона вставки з буфера / файлу -->
     <div class="drop-zone" onclick="document.getElementById('imageFile').click()">
-      📋 <b>Вставте скріншот (Ctrl+V)</b> або натисніть для вибору
+      📋 <b>Вставити фото / скріншот</b>
       <input type="file" id="imageFile" accept="image/*" style="display:none" onchange="handleImageUpload(event, 'add')">
       <img id="addPreviewThumb" class="preview-thumbnail" alt="Прев'ю">
     </div>
 
-    <input type="url" id="image" placeholder="або URL картинки (https://...)" style="font-size: 11px; padding: 4px 8px;">
+    <input type="url" id="image" placeholder="або URL картинки (https://...)" style="font-size: 12px;">
     <input type="url" id="link" placeholder="🔗 Джерело / Посилання">
-    <textarea id="content" placeholder="📝 Текст рецепту / інгредієнти" rows="2"></textarea>
+    <textarea id="content" placeholder="📝 Текст рецепту / інгредієнти" rows="3"></textarea>
     <textarea id="description" placeholder="📌 Нотатки / Примітки" rows="2"></textarea>
     <input type="text" id="tags" placeholder="Теги через кому (напр. салат, швидкий)">
     <button type="submit" style="margin-top: 4px;">Зберегти</button>
@@ -178,8 +189,13 @@
 <!-- Модальне вікно редагування -->
 <div id="editModal" class="modal">
   <div class="modal-content">
-    <h3 style="font-size: 16px;">✏️ Редагувати рецепт</h3>
-    <form id="editForm" onsubmit="saveEdit(event)" style="display: flex; flex-direction: column; gap: 6px;">
+    <div class="modal-header">
+      <h3>✏️ Редагувати рецепт</h3>
+      <!-- Кнопка видалення у правому верхньому кутку редагування -->
+      <button type="button" class="btn-icon-danger" title="Видалити рецепт" onclick="deleteCurrentRecipe()">🗑️</button>
+    </div>
+    
+    <form id="editForm" onsubmit="saveEdit(event)" style="display: flex; flex-direction: column; gap: 8px;">
       <input type="hidden" id="editId">
       <input type="text" id="editTitle" placeholder="Назва рецепту *" required>
       
@@ -196,22 +212,22 @@
       </div>
       
       <div class="drop-zone" onclick="document.getElementById('editImageFile').click()">
-        📋 <b>Замінити скріншот (Ctrl+V)</b> або обрати файл
+        📋 <b>Замінити фото / скріншот</b>
         <input type="file" id="editImageFile" accept="image/*" style="display:none" onchange="handleImageUpload(event, 'edit')">
         <img id="editPreviewThumb" class="preview-thumbnail" alt="Прев'ю">
       </div>
 
-      <div style="display: flex; gap: 4px;">
-        <input type="url" id="editImage" placeholder="URL картинки" style="font-size: 11px; padding: 4px; flex:1;">
-        <button type="button" style="background:#ffc107; color:#000; font-size:11px; width:auto; padding:0 6px;" onclick="removeImage()">🗑️ Стерти</button>
+      <div style="display: flex; gap: 6px; align-items: center;">
+        <input type="url" id="editImage" placeholder="URL картинки" style="font-size: 12px; flex:1;">
+        <button type="button" style="background:#e2e8f0; color:#4a5568; font-size:12px; width:auto; padding:0 10px; min-height:38px; border-radius:8px;" onclick="removeImage()">🗑️ Очистити</button>
       </div>
 
       <input type="url" id="editLink" placeholder="🔗 Посилання (URL)">
-      <textarea id="editContent" placeholder="📝 Текст рецепту" rows="2"></textarea>
+      <textarea id="editContent" placeholder="📝 Текст рецепту" rows="3"></textarea>
       <textarea id="editDescription" placeholder="📌 Нотатки / Примітки" rows="2"></textarea>
       <input type="text" id="editTags" placeholder="Теги через кому">
       
-      <div style="display: flex; gap: 6px; margin-top: 4px;">
+      <div style="display: flex; gap: 8px; margin-top: 6px;">
         <button type="submit" style="flex: 1;">Зберегти</button>
         <button type="button" class="btn-danger" style="flex: 1;" onclick="closeEditModal()">Скасувати</button>
       </div>
@@ -244,7 +260,7 @@
     render();
   }
 
-  // Обробка вставки з буфера обміну (Ctrl+V / Paste)
+  // Обробка вставки з буфера обміну
   document.addEventListener('paste', function (e) {
     const items = (e.clipboardData || e.originalEvent.clipboardData).items;
     for (let item of items) {
@@ -402,7 +418,7 @@
         tags: document.getElementById('editTags').value ? document.getElementById('editTags').value.split(',').map(t => t.trim()).filter(t => t) : [],
         type: document.getElementById('editType').value,
         image: finalImage,
-        link: document.getElementById('editLink').value.trim(),
+        link: document.getElementById('link').value.trim(),
         content: document.getElementById('editContent').value,
         description: document.getElementById('editDescription').value
       };
@@ -411,10 +427,16 @@
     }
   }
 
-  function deleteRecipe(id) {
-    if (confirm('Видалити цей рецепт?')) {
+  /* Видалення з підтвердженням з форми редагування */
+  function deleteCurrentRecipe() {
+    const id = document.getElementById('editId').value;
+    const recipe = recipes.find(r => r.id === id);
+    const title = recipe ? `"${recipe.title}"` : 'цей рецепт';
+
+    if (confirm(`Ви дійсно бажаєте видалити ${title}? Цю дію неможливо скасувати.`)) {
       recipes = recipes.filter(r => r.id !== id);
       saveToStorage();
+      closeEditModal();
     }
   }
 
@@ -478,7 +500,7 @@
 
       let mediaHtml = '';
       if (imgUrl) {
-        mediaHtml += `<button class="social-link image-btn" onclick="openImageViewer('${imgUrl}')">🔍 Відкрити скріншот</button>`;
+        mediaHtml += `<button class="social-link image-btn" onclick="openImageViewer('${imgUrl}')">🔍 Відкрити фото</button>`;
       }
 
       if (r.link) {
@@ -510,8 +532,7 @@
           ${notesHtml}
           <div>${r.tags ? r.tags.map(t => `<span class="badge">#${t}</span>`).join(' ') : ''}</div>
           <div class="card-actions">
-            <button class="btn-edit" title="Редагувати" onclick="openEditModal('${r.id}')">✏️</button>
-            <button class="btn-danger" title="Видалити" onclick="deleteRecipe('${r.id}')">🗑️</button>
+            <button class="btn-edit" onclick="openEditModal('${r.id}')">✏️ Редагувати</button>
           </div>
         </div>
       `;
