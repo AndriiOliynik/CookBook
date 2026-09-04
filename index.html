@@ -8,9 +8,8 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     
-    /* Додано відступ зверху, щоб інтерфейс не перекривався годинником Android */
     body { 
-      padding: 10px; 
+      padding: 12px; 
       padding-top: calc(36px + env(safe-area-inset-top)); 
       padding-bottom: 110px; 
       background: #f4f4f9; 
@@ -18,18 +17,16 @@
       -webkit-tap-highlight-color: transparent; 
     }
     
-    /* Шапка з безпечними відступами */
     header { 
       display: flex; 
       justify-content: space-between; 
       align-items: center; 
-      margin-bottom: 12px; 
+      margin-bottom: 14px; 
       position: relative; 
       padding-top: 6px;
     }
     header h2 { font-size: 20px; font-weight: 800; }
 
-    /* Меню з 3 лініями */
     .menu-toggle-btn {
       background: #ffffff;
       border: 1px solid #e2e8f0;
@@ -68,7 +65,7 @@
       border-radius: 6px;
     }
 
-    .controls { display: flex; flex-direction: column; gap: 8px; margin-bottom: 14px; }
+    .controls { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
     input, select, button, textarea { padding: 10px 12px; border: 1px solid #ccc; border-radius: 8px; font-size: 14px; width: 100%; outline: none; }
     input:focus, select:focus, textarea:focus { border-color: #40E0D0; }
     
@@ -84,11 +81,11 @@
     .grid-control-box { display: flex; align-items: center; gap: 8px; background: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; }
     .grid-control-box select { width: auto; flex-grow: 1; padding: 4px 8px; font-size: 13px; }
 
-    /* Покращена сітка масштабування */
+    /* Мобільна сітка */
     .grid { 
       display: grid; 
       grid-template-columns: repeat(var(--cols-count, 2), minmax(0, 1fr)); 
-      gap: 10px; 
+      gap: 12px; 
     }
     
     .card { background: white; border-radius: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.06); display: flex; flex-direction: column; overflow: hidden; border: 1px solid #edf2f7; width: 100%; }
@@ -107,32 +104,32 @@
       cursor: pointer; 
     }
     
-    .card-body { padding: 8px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
+    .card-body { padding: 10px; display: flex; flex-direction: column; gap: 6px; flex-grow: 1; }
     .card h3 { font-size: var(--card-title-size, 14px); font-weight: 700; color: #1a202c; line-height: 1.25; word-break: break-word; }
     
     .badge { display: inline-block; background: #edf2f7; color: #4a5568; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 500; }
     
     .text-content { 
       flex-grow: 1; 
-      min-height: 24px; 
-      max-height: 160px; 
+      min-height: 30px; 
+      max-height: 180px; 
       overflow-y: auto; 
       white-space: pre-wrap; 
       background: #f8fafc; 
       padding: 6px; 
       border-radius: 6px; 
       font-size: var(--card-text-size, 11px); 
-      line-height: 1.3;
+      line-height: 1.35;
       border: 1px solid #e2e8f0; 
     }
     .notes-content { 
-      font-size: 10px; 
+      font-size: 11px; 
       color: #744210; 
       background: #fffbea; 
-      padding: 5px; 
+      padding: 6px; 
       border-radius: 6px; 
       border: 1px dashed #fbd38d; 
-      max-height: 70px;
+      max-height: 80px;
       overflow-y: auto;
     }
 
@@ -145,9 +142,9 @@
       gap: 4px; 
       font-weight: 600; 
       text-decoration: none; 
-      padding: 5px 6px; 
+      padding: 6px 8px; 
       border-radius: 6px; 
-      font-size: 10px; 
+      font-size: 11px; 
       width: 100%; 
     }
     .social-link.url-default { background: #e7f3ff; color: #0066cc; }
@@ -169,7 +166,6 @@
     .image-viewer-modal img { max-width: 100%; max-height: 95vh; object-fit: contain; }
     .close-viewer { position: absolute; top: 12px; right: 18px; color: white; font-size: 32px; cursor: pointer; font-weight: bold; }
 
-    /* Кнопка Додати — піднята вище (bottom: 80px), щоб не накладатися на жестову смугу/кнопки Android */
     .floating-add-btn {
       position: fixed; 
       bottom: 80px; 
@@ -189,6 +185,63 @@
       cursor: pointer; 
       width: auto; 
       min-height: auto;
+    }
+
+    /* Адаптація під ПК (ширина екрана від 768px) */
+    @media (min-width: 768px) {
+      body {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 24px;
+        padding-bottom: 100px;
+      }
+
+      header h2 { font-size: 26px; }
+
+      .controls {
+        flex-direction: row;
+        align-items: center;
+      }
+      .controls input[type="text"] { flex: 2; }
+      .controls select { flex: 1; }
+      .grid-control-box { flex: 1; justify-content: space-between; }
+
+      .grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+        gap: 20px;
+      }
+
+      .card {
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      .card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+      }
+
+      .card-preview {
+        height: 200px !important;
+      }
+
+      .card h3 {
+        font-size: 16px !important;
+      }
+
+      .text-content {
+        font-size: 13px !important;
+        max-height: 220px;
+      }
+
+      .notes-content {
+        font-size: 12px !important;
+      }
+
+      .floating-add-btn {
+        bottom: 30px;
+        left: 30px;
+        padding: 14px 24px;
+        font-size: 15px;
+      }
     }
   </style>
 </head>
@@ -309,7 +362,6 @@
     }
   });
 
-  // Точне налаштування пропорцій карток під будь-який екран
   function changeGridColumns(cols) {
     const root = document.documentElement;
     root.style.setProperty('--cols-count', cols);
@@ -583,7 +635,6 @@
     });
   }
 
-  // Експорт JSON, оптимізований для Android 13-16 / POCO
   function exportData() {
     if (recipes.length === 0) {
       alert('Немає рецептів для експорту!');
@@ -600,7 +651,6 @@
     downloadAnchor.remove();
   }
 
-  // Експорт Excel
   function exportExcelData() {
     if (recipes.length === 0) { 
       alert('Немає рецептів для експорту!'); 
