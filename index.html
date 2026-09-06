@@ -70,14 +70,13 @@
     button:active { opacity: 0.85; }
     button.btn-secondary { background: #007bff; }
     button.btn-excel { background: #1d6f42; }
-    button.btn-edit { background: #40E0D0; color: #fff; padding: 4px 6px; min-height: 32px; border-radius: 6px; font-size: 11px; width: 100%; }
     button.btn-danger { background: #dc3545; color: #fff; }
     button.btn-icon-danger { background: #fff0f0; color: #dc3545; border: 1px solid #ffcdd2; width: 36px; height: 36px; border-radius: 50%; padding: 0; font-size: 16px; }
 
     .grid-control-box { display: flex; align-items: center; gap: 8px; background: #fff; padding: 8px 12px; border-radius: 8px; border: 1px solid #ccc; font-size: 13px; }
     .grid-control-box select { width: auto; flex-grow: 1; padding: 4px 8px; font-size: 13px; }
 
-    /* Плитки */
+    /* Квадратні плитки (1:1) */
     .grid { 
       display: grid; 
       grid-template-columns: repeat(var(--cols-count, 2), minmax(0, 1fr)); 
@@ -93,17 +92,42 @@
       overflow: hidden; 
       border: 1px solid #edf2f7; 
       width: 100%; 
+      aspect-ratio: 1 / 1;
+      position: relative;
     }
 
-    .card-header-box { padding: 10px; display: flex; flex-direction: column; gap: 4px; }
-    .card h3 { font-size: var(--card-title-size, 14px); font-weight: 700; color: #1a202c; line-height: 1.25; word-break: break-word; }
-    .badge { display: inline-block; background: #edf2f7; color: #4a5568; padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: 500; width: fit-content; }
+    .card-header-box { 
+      padding: 6px 8px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 2px; 
+      z-index: 2;
+    }
+    .card h3 { 
+      font-size: var(--card-title-size, 13px); 
+      font-weight: 700; 
+      color: #1a202c; 
+      line-height: 1.2; 
+      white-space: nowrap; 
+      overflow: hidden; 
+      text-overflow: ellipsis; 
+    }
+    .badge { 
+      display: inline-block; 
+      background: #edf2f7; 
+      color: #4a5568; 
+      padding: 1px 5px; 
+      border-radius: 4px; 
+      font-size: 9px; 
+      font-weight: 500; 
+      width: fit-content; 
+    }
 
-    /* Слайдер картинок */
+    /* Слайдер картинок у картці */
     .slider-container {
       position: relative;
+      flex: 1;
       width: 100%;
-      height: var(--card-img-height, 150px);
       background: #e9ecef;
       overflow: hidden;
     }
@@ -128,14 +152,14 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      background: rgba(0,0,0,0.4);
+      background: rgba(0,0,0,0.35);
       color: white;
       border: none;
-      width: 26px;
-      height: 26px;
+      width: 22px;
+      height: 22px;
       border-radius: 50%;
       min-height: auto;
-      font-size: 14px;
+      font-size: 12px;
       z-index: 5;
       padding: 0;
     }
@@ -143,9 +167,17 @@
     .slider-btn.next { right: 4px; }
     .no-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #a0aec0; }
 
-    .card-footer-box { padding: 10px; display: flex; flex-direction: column; gap: 6px; margin-top: auto; }
+    /* Підвал картки */
+    .card-footer-box { 
+      padding: 6px 8px; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 4px; 
+      margin-top: auto; 
+      background: #fff;
+      z-index: 2;
+    }
 
-    /* Рядок кнопок в 1 лінію */
     .card-buttons-row {
       display: flex;
       gap: 4px;
@@ -153,16 +185,34 @@
       align-items: center;
     }
 
+    .btn-icon-only {
+      font-size: 13px;
+      height: 30px;
+      min-height: 30px;
+      padding: 0;
+      border-radius: 6px;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-icon-desc { background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; }
+    .btn-icon-notes { background: #fffbea; color: #744210; border: 1px solid #fbd38d; }
+    .btn-icon-edit { background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; }
+
     .social-link { 
       display: inline-flex; 
       align-items: center; 
       justify-content: center; 
       font-weight: 600; 
       text-decoration: none; 
-      padding: 6px 8px; 
+      padding: 4px; 
       border-radius: 6px; 
-      font-size: 11px; 
+      font-size: 10px; 
       width: 100%; 
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     .social-link.url-default { background: #e7f3ff; color: #0066cc; }
     .social-link.url-youtube { background: #ffe6e6; color: #cc0000; }
@@ -170,30 +220,112 @@
     .social-link.url-tiktok { background: #e6f7f7; color: #000000; }
     .social-link.url-facebook { background: #e7f0ff; color: #1877f2; }
 
-    .btn-view-desc, .btn-view-notes {
-      font-size: 11px;
-      min-height: 32px;
-      padding: 4px 6px;
-      border-radius: 6px;
-      width: 100%;
-      white-space: nowrap;
-    }
-    .btn-view-desc { background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; }
-    .btn-view-notes { background: #fffbea; color: #744210; border: 1px solid #fbd38d; }
-
     /* Модальні вікна */
     .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); justify-content: center; align-items: center; z-index: 1000; padding: 12px; backdrop-filter: blur(2px); }
     .modal-content { background: white; padding: 16px; border-radius: 12px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; }
 
-    /* Поля зображень у формі */
+    /* Великі зручні кнопки закриття */
+    .btn-close-large {
+      background: rgba(0,0,0,0.06);
+      border: none;
+      color: #4a5568;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      min-height: auto;
+      padding: 0;
+    }
+    .btn-close-large:active { background: rgba(0,0,0,0.15); }
+
+    /* Поля зображень */
     .image-fields-list { display: flex; flex-direction: column; gap: 8px; }
     .image-field-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px; border: 1px solid #e2e8f0; border-radius: 8px; }
     .image-field-item img { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; }
 
-    .image-viewer-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); justify-content: center; align-items: center; z-index: 2000; }
-    .image-viewer-modal img { max-width: 95%; max-height: 95vh; object-fit: contain; }
-    .close-viewer { position: absolute; top: 12px; right: 18px; color: white; font-size: 32px; cursor: pointer; }
+    /* Лайтбокс з гортанням повного зображення */
+    .image-viewer-modal { 
+      display: none; 
+      position: fixed; 
+      top: 0; left: 0; 
+      width: 100%; height: 100%; 
+      background: rgba(0,0,0,0.92); 
+      justify-content: center; 
+      align-items: center; 
+      z-index: 2000; 
+    }
+    .viewer-container {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .viewer-track {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: none;
+    }
+    .viewer-track::-webkit-scrollbar { display: none; }
+    .viewer-slide {
+      flex: 0 0 100%;
+      width: 100%;
+      height: 100%;
+      scroll-snap-align: start;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .viewer-slide img {
+      max-width: 95%;
+      max-height: 85vh;
+      object-fit: contain;
+    }
+    .viewer-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(255,255,255,0.25);
+      color: white;
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      font-size: 24px;
+      z-index: 2100;
+      padding: 0;
+    }
+    .viewer-btn.prev { left: 12px; }
+    .viewer-btn.next { right: 12px; }
+
+    /* Велика помітна кнопка закриття у лайтбоксі */
+    .close-viewer-btn { 
+      position: absolute; 
+      top: 16px; 
+      right: 16px; 
+      color: white; 
+      background: rgba(255, 255, 255, 0.25);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      font-size: 22px; 
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer; 
+      z-index: 2200; 
+    }
+    .close-viewer-btn:active { background: rgba(255, 255, 255, 0.4); }
 
     .floating-add-btn {
       position: fixed; 
@@ -213,7 +345,7 @@
     @media (min-width: 768px) {
       body { max-width: 1400px; margin: 0 auto; padding: 24px; }
       .controls { flex-direction: row; }
-      .grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)) !important; gap: 20px; }
+      .grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)) !important; gap: 16px; }
       .floating-add-btn { bottom: 30px; left: 30px; }
     }
   </style>
@@ -239,12 +371,12 @@
   </select>
 
   <div class="grid-control-box">
-    <span>📱 Рецептів в ряд:</span>
+    <span>📱 Плиток в ряд:</span>
     <select id="colsSelect" onchange="changeGridColumns(this.value)">
-      <option value="1">1 картка</option>
-      <option value="2" selected>2 картки</option>
-      <option value="3">3 картки</option>
-      <option value="4">4 картки</option>
+      <option value="1">1</option>
+      <option value="2" selected>2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
     </select>
   </div>
 
@@ -261,7 +393,7 @@
   <div class="modal-content">
     <div class="modal-header">
       <h3>➕ Новий рецепт</h3>
-      <button type="button" style="width:auto; border:none; background:transparent; font-size:20px;" onclick="closeAddModal()">✕</button>
+      <button type="button" class="btn-close-large" onclick="closeModal('addModal')">✕</button>
     </div>
     <form id="recipeForm" onsubmit="addRecipe(event)" style="display:flex; flex-direction:column; gap:8px;">
       <input type="text" id="title" placeholder="Назва рецепту *" required>
@@ -277,7 +409,7 @@
       
       <div style="display:flex; gap:8px; margin-top:6px;">
         <button type="submit" style="flex:1;">Зберегти</button>
-        <button type="button" class="btn-danger" style="flex:1;" onclick="closeAddModal()">Скасувати</button>
+        <button type="button" class="btn-danger" style="flex:1;" onclick="closeModal('addModal')">Скасувати</button>
       </div>
     </form>
   </div>
@@ -288,7 +420,10 @@
   <div class="modal-content">
     <div class="modal-header">
       <h3>✏️ Редагувати рецепт</h3>
-      <button type="button" class="btn-icon-danger" onclick="deleteCurrentRecipe()">🗑️</button>
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button type="button" class="btn-icon-danger" onclick="deleteCurrentRecipe()">🗑️</button>
+        <button type="button" class="btn-close-large" onclick="closeModal('editModal')">✕</button>
+      </div>
     </div>
     <form id="editForm" onsubmit="saveEdit(event)" style="display:flex; flex-direction:column; gap:8px;">
       <input type="hidden" id="editId">
@@ -305,7 +440,7 @@
       
       <div style="display:flex; gap:8px; margin-top:6px;">
         <button type="submit" style="flex:1;">Зберегти</button>
-        <button type="button" class="btn-danger" style="flex:1;" onclick="closeEditModal()">Скасувати</button>
+        <button type="button" class="btn-danger" style="flex:1;" onclick="closeModal('editModal')">Скасувати</button>
       </div>
     </form>
   </div>
@@ -316,17 +451,21 @@
   <div class="modal-content">
     <div class="modal-header">
       <h3 id="descModalTitle"></h3>
-      <button type="button" style="width:auto; border:none; background:transparent; font-size:20px;" onclick="closeDescModal()">✕</button>
+      <button type="button" class="btn-close-large" onclick="closeModal('descModal')">✕</button>
     </div>
     <div id="descModalBody" style="display:flex; flex-direction:column; gap:10px; font-size:13px; white-space:pre-wrap; max-height:60vh; overflow-y:auto; background:#f8fafc; padding:10px; border-radius:8px;"></div>
-    <button type="button" class="btn-secondary" onclick="closeDescModal()">Закрити</button>
+    <button type="button" class="btn-secondary" onclick="closeModal('descModal')">Закрити</button>
   </div>
 </div>
 
-<!-- Модальне вікно перегляду повного зображення -->
-<div id="imageViewer" class="image-viewer-modal" onclick="closeImageViewer()">
-  <span class="close-viewer">&times;</span>
-  <img id="fullImage" src="" alt="Скріншот">
+<!-- Модальне вікно перегляду та гортання фото -->
+<div id="imageViewer" class="image-viewer-modal" onclick="closeViewerOnBackground(event)">
+  <button class="close-viewer-btn" onclick="closeModal('imageViewer')">✕</button>
+  <div class="viewer-container">
+    <button class="viewer-btn prev" onclick="scrollViewer(-1)">‹</button>
+    <div id="viewerTrack" class="viewer-track"></div>
+    <button class="viewer-btn next" onclick="scrollViewer(1)">›</button>
+  </div>
 </div>
 
 <script>
@@ -340,6 +479,50 @@
 
   let tempAddImages = [];
   let tempEditImages = [];
+  let activeModalId = null;
+
+  /* РОБОТА З ІСТОРІЄЮ ТА КНОПКОЮ "НАЗАД" СМАРТФОНА */
+  window.addEventListener('popstate', function(event) {
+    if (activeModalId) {
+      closeModal(activeModalId, true);
+    }
+  });
+
+  function openModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    
+    // Якщо якесь вікно вже було відкрите
+    if (activeModalId && activeModalId !== modalId) {
+      document.getElementById(activeModalId).style.display = 'none';
+    }
+
+    modal.style.display = 'flex';
+    activeModalId = modalId;
+
+    // Додаємо запис в історію пристрою для перехоплення кнопки "Назад"
+    history.pushState({ modalOpen: true, modalId: modalId }, '');
+  }
+
+  function closeModal(modalId, isPopState = false) {
+    const modal = document.getElementById(modalId);
+    if (modal) modal.style.display = 'none';
+
+    if (activeModalId === modalId) {
+      activeModalId = null;
+    }
+
+    // Якщо закрили кліком (не через кнопка "Назад"), відкочуємо історію назад
+    if (!isPopState && history.state && history.state.modalOpen) {
+      history.back();
+    }
+  }
+
+  function closeViewerOnBackground(e) {
+    if (e.target.id === 'imageViewer' || e.target.classList.contains('viewer-slide')) {
+      closeModal('imageViewer');
+    }
+  }
 
   function toggleMenu(e) { e.stopPropagation(); document.getElementById('dropdownMenu').classList.toggle('show'); }
   function closeMenu() { document.getElementById('dropdownMenu').classList.remove('show'); }
@@ -352,17 +535,13 @@
     const root = document.documentElement;
     root.style.setProperty('--cols-count', cols);
     if (cols >= 4) {
-      root.style.setProperty('--card-img-height', '100px');
       root.style.setProperty('--card-title-size', '11px');
     } else if (cols == 3) {
-      root.style.setProperty('--card-img-height', '120px');
       root.style.setProperty('--card-title-size', '12px');
     } else if (cols == 2) {
-      root.style.setProperty('--card-img-height', '150px');
       root.style.setProperty('--card-title-size', '13px');
     } else {
-      root.style.setProperty('--card-img-height', '220px');
-      root.style.setProperty('--card-title-size', '16px');
+      root.style.setProperty('--card-title-size', '15px');
     }
     localStorage.setItem('grid_cols', cols);
   }
@@ -473,23 +652,40 @@
     }
     
     document.getElementById('descModalBody').innerHTML = html;
-    document.getElementById('descModal').style.display = 'flex';
+    openModal('descModal');
   }
-  function closeDescModal() { document.getElementById('descModal').style.display = 'none'; }
 
-  function openImageViewer(src) {
-    document.getElementById('fullImage').src = src;
-    document.getElementById('imageViewer').style.display = 'flex';
+  function openImageViewer(id, initialIndex) {
+    const r = recipes.find(item => item.id === id);
+    if (!r) return;
+    const imgs = r.images && r.images.length ? r.images : (r.image ? [r.image] : []);
+    if (!imgs.length) return;
+
+    const track = document.getElementById('viewerTrack');
+    track.innerHTML = imgs.map(src => `
+      <div class="viewer-slide">
+        <img src="${src}">
+      </div>
+    `).join('');
+
+    openModal('imageViewer');
+
+    setTimeout(() => {
+      track.scrollLeft = initialIndex * track.clientWidth;
+    }, 50);
   }
-  function closeImageViewer() { document.getElementById('imageViewer').style.display = 'none'; }
+
+  function scrollViewer(direction) {
+    const track = document.getElementById('viewerTrack');
+    track.scrollBy({ left: direction * track.clientWidth, behavior: 'smooth' });
+  }
 
   function openAddModal() {
     document.getElementById('recipeForm').reset();
     tempAddImages = [];
     renderImageFields('add');
-    document.getElementById('addModal').style.display = 'flex';
+    openModal('addModal');
   }
-  function closeAddModal() { document.getElementById('addModal').style.display = 'none'; }
 
   function addRecipe(e) {
     e.preventDefault();
@@ -507,7 +703,7 @@
       description: document.getElementById('description').value
     });
     saveToStorage();
-    closeAddModal();
+    closeModal('addModal');
   }
 
   function openEditModal(id) {
@@ -522,9 +718,8 @@
     
     tempEditImages = r.images && r.images.length ? [...r.images] : (r.image ? [r.image] : []);
     renderImageFields('edit');
-    document.getElementById('editModal').style.display = 'flex';
+    openModal('editModal');
   }
-  function closeEditModal() { document.getElementById('editModal').style.display = 'none'; }
 
   function saveEdit(e) {
     e.preventDefault();
@@ -545,7 +740,7 @@
         description: document.getElementById('editDescription').value
       };
       saveToStorage();
-      closeEditModal();
+      closeModal('editModal');
     }
   }
 
@@ -554,7 +749,7 @@
     if (confirm("Видалити цей рецепт?")) {
       recipes = recipes.filter(r => r.id !== id);
       saveToStorage();
-      closeEditModal();
+      closeModal('editModal');
     }
   }
 
@@ -595,7 +790,10 @@
       
       if (imgs.length > 0) {
         const trackId = `track_${r.id}`;
-        const slides = imgs.map(imgSrc => `<img src="${imgSrc}" class="slider-slide" loading="lazy" onclick="openImageViewer('${imgSrc}')">`).join('');
+        const slides = imgs.map((imgSrc, idx) => `
+          <img src="${imgSrc}" class="slider-slide" loading="lazy" onclick="openImageViewer('${r.id}', ${idx})">
+        `).join('');
+
         const navBtns = imgs.length > 1 
           ? `<button class="slider-btn prev" onclick="scrollSlider('${trackId}', -1)">‹</button>
              <button class="slider-btn next" onclick="scrollSlider('${trackId}', 1)">›</button>` 
@@ -616,8 +814,8 @@
         if (info) linkHtml = `<a href="${r.link}" target="_blank" class="social-link ${info.class}">${info.label}</a>`;
       }
 
-      let descBtnHtml = r.content ? `<button class="btn-view-desc" onclick="openDescModal('${r.id}', 'content')">📝 Опис</button>` : '';
-      let notesBtnHtml = r.description ? `<button class="btn-view-notes" onclick="openDescModal('${r.id}', 'notes')">📌 Нотатки</button>` : '';
+      let descBtnHtml = r.content ? `<button class="btn-icon-only btn-icon-desc" onclick="openDescModal('${r.id}', 'content')">📝</button>` : '';
+      let notesBtnHtml = r.description ? `<button class="btn-icon-only btn-icon-notes" onclick="openDescModal('${r.id}', 'notes')">📌</button>` : '';
 
       card.innerHTML = `
         <div class="card-header-box">
@@ -630,7 +828,7 @@
           <div class="card-buttons-row">
             ${descBtnHtml}
             ${notesBtnHtml}
-            <button class="btn-edit" onclick="openEditModal('${r.id}')">✏️ Редагувати</button>
+            <button class="btn-icon-only btn-icon-edit" onclick="openEditModal('${r.id}')">✏️</button>
           </div>
         </div>
       `;
