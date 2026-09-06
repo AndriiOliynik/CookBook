@@ -68,6 +68,7 @@
     
     button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
     button:active { opacity: 0.85; }
+    button:disabled { opacity: 0.4; cursor: not-allowed; }
     button.btn-secondary { background: #007bff; color: white; }
     button.btn-excel { background: #1d6f42; }
     button.btn-danger { background: #dc3545; color: #fff; }
@@ -110,16 +111,6 @@
       white-space: nowrap; 
       overflow: hidden; 
       text-overflow: ellipsis; 
-    }
-    .badge { 
-      display: inline-block; 
-      background: #edf2f7; 
-      color: #4a5568; 
-      padding: 1px 5px; 
-      border-radius: 4px; 
-      font-size: 9px; 
-      font-weight: 500; 
-      width: fit-content; 
     }
 
     .slider-container {
@@ -196,6 +187,12 @@
     .btn-icon-desc { background: #edf2f7; color: #2d3748; border: 1px solid #cbd5e0; }
     .btn-icon-notes { background: #fffbea; color: #744210; border: 1px solid #fbd38d; }
     .btn-icon-edit { background: #e6fffa; color: #234e52; border: 1px solid #b2f5ea; }
+    
+    .btn-icon-only:disabled {
+      background: #f1f5f9 !important;
+      color: #cbd5e1 !important;
+      border-color: #e2e8f0 !important;
+    }
 
     .social-link { 
       display: inline-flex; 
@@ -244,13 +241,13 @@
       margin-top: 4px;
     }
 
-    /* Кнопка додавання фото розміром як картка мініатюри */
+    /* Збільшена кнопка додавання картинки */
     .btn-add-img-card {
-      width: 68px;
-      height: 68px;
-      min-height: 68px;
+      width: 84px;
+      height: 84px;
+      min-height: 84px;
       border-radius: 8px;
-      font-size: 22px;
+      font-size: 26px;
       padding: 0;
       background: #f8fafc;
       color: #2d3748;
@@ -264,28 +261,52 @@
     }
     .btn-add-img-card:active { background: #e2e8f0; }
 
-    .image-fields-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; align-items: center; }
+    .image-fields-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; align-items: center; }
+    
+    /* Збільшена картка мініатюри у модалці */
     .image-field-item { 
       display: flex; 
       flex-direction: column;
       align-items: center; 
-      gap: 3px; 
+      gap: 4px; 
       background: #f8fafc; 
       padding: 4px; 
-      border: 1px solid #e2e8f0; 
+      border: 1px solid #cbd5e0; 
       border-radius: 8px; 
       position: relative;
-      width: 68px;
+      width: 84px;
     }
-    .image-field-item img { width: 58px; height: 58px; object-fit: cover; border-radius: 6px; }
-    .image-field-actions { display: flex; gap: 2px; width: 100%; justify-content: space-between; }
+    .image-field-item img { width: 74px; height: 74px; object-fit: cover; border-radius: 6px; }
+    .image-field-actions { display: flex; gap: 4px; width: 100%; justify-content: center; }
     
-    .btn-action-icon {
-      flex: 1;
+    /* Кнопки переміщення (стрілочки) поверх зображення у верхніх кутах */
+    .btn-move-top {
+      position: absolute;
+      top: 6px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      border: none;
+      width: 22px;
       height: 22px;
       min-height: 22px;
-      padding: 0;
+      border-radius: 4px;
       font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      cursor: pointer;
+      z-index: 3;
+    }
+    .btn-move-top.left { left: 6px; }
+    .btn-move-top.right { right: 6px; }
+
+    .btn-action-icon {
+      flex: 1;
+      height: 24px;
+      min-height: 24px;
+      padding: 0;
+      font-size: 11px;
       border-radius: 4px;
       line-height: 1;
     }
@@ -620,18 +641,18 @@
       const nextDisabled = index === imgs.length - 1 ? 'disabled style="opacity:0.3;"' : '';
 
       item.innerHTML = `
+        <button type="button" class="btn-move-top left" ${prevDisabled} onclick="moveImage('${mode}', ${index}, -1)" title="Перемістити вліво">◄</button>
+        <button type="button" class="btn-move-top right" ${nextDisabled} onclick="moveImage('${mode}', ${index}, 1)" title="Перемістити вправо">►</button>
         <img src="${imgBase64}">
         <input type="file" id="${mode}_replace_${index}" accept="image/*" style="display:none" onchange="handleImageReplace(event, '${mode}', ${index})">
         <div class="image-field-actions">
-          <button type="button" class="btn-secondary btn-action-icon" ${prevDisabled} onclick="moveImage('${mode}', ${index}, -1)" title="Вліво">◄</button>
+          <button type="button" class="btn-secondary btn-action-icon" onclick="document.getElementById('${mode}_replace_${index}').click()" title="Замінити">🔄</button>
           <button type="button" class="btn-danger btn-action-icon" onclick="removeImageField('${mode}', ${index})" title="Видалити">🗑️</button>
-          <button type="button" class="btn-secondary btn-action-icon" ${nextDisabled} onclick="moveImage('${mode}', ${index}, 1)" title="Вправо">►</button>
         </div>
       `;
       container.appendChild(item);
     });
 
-    // Додаємо велику кнопку "+" розміром як картки зображень
     const addCardBtn = document.createElement('button');
     addCardBtn.type = 'button';
     addCardBtn.className = 'btn-add-img-card';
@@ -660,7 +681,6 @@
       const files = Array.from(e.target.files);
       if (files.length === 0) return;
 
-      // Обробляємо файли послідовно через Promise.all, щоб зберегти точний порядок
       const processedImages = await Promise.all(
         files.map(file => new Promise(resolve => processImageFile(file, resolve)))
       );
@@ -931,13 +951,16 @@
         if (info) linkHtml = `<a href="${r.link}" target="_blank" class="social-link ${info.class}">${info.label}</a>`;
       }
 
-      let descBtnHtml = r.content ? `<button class="btn-icon-only btn-icon-desc" onclick="openDescModal('${r.id}', 'content')">📝</button>` : '';
-      let notesBtnHtml = r.description ? `<button class="btn-icon-only btn-icon-notes" onclick="openDescModal('${r.id}', 'notes')">📌</button>` : '';
+      // Кнопки завжди додаються; якщо дані відсутні — вони у стані disabled
+      const descDisabled = !r.content ? 'disabled' : '';
+      const notesDisabled = !r.description ? 'disabled' : '';
+
+      let descBtnHtml = `<button class="btn-icon-only btn-icon-desc" ${descDisabled} onclick="openDescModal('${r.id}', 'content')">📝</button>`;
+      let notesBtnHtml = `<button class="btn-icon-only btn-icon-notes" ${notesDisabled} onclick="openDescModal('${r.id}', 'notes')">📌</button>`;
 
       card.innerHTML = `
         <div class="card-header-box">
           <h3>${r.title}</h3>
-          <span class="badge">${r.category}</span>
         </div>
         ${sliderHtml}
         <div class="card-footer-box">
