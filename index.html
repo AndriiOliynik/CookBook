@@ -531,17 +531,67 @@
 
 <script>
   let recipes = [];
-  try {
-    recipes = JSON.parse(localStorage.getItem('my_recipes')) || [];
-  } catch (e) {
-    recipes = [];
+  let db;
+
+  // Ініціалізація IndexedDB замість localStorage
+  function initDB() {
+    return new Promise((resolve, reject) => {
+      const request = indexedDB.open('RecipeBookDB', 1);
+      
+      request.onupgradeneeded = (e) => {
+        db = e.target.result;
+        if (!db.objectStoreNames.contains('recipes')) {
+          db.createObjectStore('recipes', { keyPath: 'id' });
+        }
+      };
+
+      request.onsuccess = (e) => {
+        db = e.target.result;
+        resolve();
+      };
+
+      request.onerror = (e) => {
+        console.error('Помилка відкриття БД:', e);
+        reject(e);
+      };
+    });
   }
 
-  recipes = recipes.map(r => {
-    let imgs = r.images || [];
-    if (imgs.length === 0 && r.image) imgs = [r.image];
-    return { ...r, images: imgs };
-  });
+  async function loadRecipesFromDB() {
+    return new Promise((resolve) => {
+      const transaction = db.transaction(['recipes'], 'readonly');
+      const store = transaction.objectStore('recipes');
+      const request = store.getAll();
+
+      request.onsuccess = () => {
+        let loaded = request.result || [];
+        // Міграція даних зі старих версій
+        recipes = loaded.map(r => {
+          let imgs = r.images || [];
+          if (imgs.length === 0 && r.image) imgs = [r.image];
+          return { ...r, images: imgs };
+        });
+        resolve();
+      };
+    });
+  }
+
+  async function migrateFromLocalStorage() {
+    try {
+      const localData = localStorage.getItem('my_recipes');
+      if (localData) {
+        const parsed = JSON.parse(localData);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const transaction = db.transaction(['recipes'], 'readwrite');
+          const store = transaction.objectStore('recipes');
+          parsed.forEach(r => store.put(r));
+          localStorage.removeItem('my_recipes');
+        }
+      }
+    } catch(e) {
+      console.log('Міграція з localStorage не потрібна або завершилася з помилкою');
+    }
+  }
 
   let tempAddImages = [];
   let tempEditImages = [];
@@ -596,7 +646,6 @@
     const root = document.documentElement;
     root.style.setProperty('--cols-count', cols);
     
-    // Пропорційне зменшення кнопок та параметрів відображення картинок
     if (cols >= 4) {
       root.style.setProperty('--card-title-size', '10px');
       root.style.setProperty('--img-height', '80px');
@@ -821,7 +870,7 @@
     openModal('addModal');
   }
 
-  function addRecipe() {
+  async function addRecipe() {
     const titleInput = document.getElementById('title');
     const titleVal = titleInput ? titleInput.value.trim() : '';
     
@@ -846,7 +895,8 @@
 
     recipes.push(newRecipe);
     
-    if (saveToStorage()) {
+    const saved = await saveToStorage(newRecipe);
+    if (saved) {
       closeModal('addModal');
     } else {
       recipes.pop();
@@ -868,7 +918,7 @@
     openModal('editModal');
   }
 
-  function saveEdit() {
+  async function saveEdit() {
     const id = document.getElementById('editId').value;
     const titleVal = document.getElementById('editTitle').value.trim();
     if (!titleVal) {
@@ -882,7 +932,7 @@
       let rawLink = document.getElementById('editLink').value.trim();
       if (rawLink && !/^https?:\/\//i.test(rawLink)) rawLink = 'https://' + rawLink;
 
-      recipes[idx] = {
+      const updatedRecipe = {
         id,
         title: titleVal,
         category: document.getElementById('editCategory').value.trim() || 'Загальні',
@@ -893,7 +943,10 @@
         description: document.getElementById('editDescription').value || ""
       };
 
-      if (saveToStorage()) {
+      recipes[idx] = updatedRecipe;
+
+      const saved = await saveToStorage(updatedRecipe);
+      if (saved) {
         closeModal('editModal');
       } else {
         recipes[idx] = oldRecipe;
@@ -901,25 +954,49 @@
     }
   }
 
-  function deleteCurrentRecipe() {
+  async function deleteCurrentRecipe() {
     const id = document.getElementById('editId').value;
     if (confirm("Видалити цей рецепт?")) {
       recipes = recipes.filter(r => r.id !== id);
-      saveToStorage();
+      await removeFromStorage(id);
+      updateCategories();
+      render();
       closeModal('editModal');
     }
   }
 
-  function saveToStorage() {
+  async function saveToStorage(singleRecipe = null) {
     try {
-      localStorage.setItem('my_recipes', JSON.stringify(recipes));
+      const transaction = db.transaction(['recipes'], 'readwrite');
+      const store = transaction.objectStore('recipes');
+      
+      if (singleRecipe) {
+        store.put(singleRecipe);
+      } else {
+        recipes.forEach(r => store.put(r));
+      }
+
+      await new Promise((resolve, reject) => {
+        transaction.oncomplete = () => resolve();
+        transaction.onerror = (e) => reject(e);
+      });
+
       updateCategories();
       render();
       return true;
     } catch (e) {
-      alert('⚠️ Недостатньо пам\'яті у браузері для збереження цих картинок! Спробуйте додати менше картинок або видалити старі рецепти.');
+      alert('⚠️ Помилка збереження даних!');
       return false;
     }
+  }
+
+  async function removeFromStorage(id) {
+    return new Promise((resolve) => {
+      const transaction = db.transaction(['recipes'], 'readwrite');
+      const store = transaction.objectStore('recipes');
+      store.delete(id);
+      transaction.oncomplete = () => resolve();
+    });
   }
 
   function updateCategories() {
@@ -1010,16 +1087,16 @@
     a.click();
   }
 
-  function importData(e) {
+  async function importData(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = async function(event) {
       try {
         const imported = JSON.parse(event.target.result);
         if (Array.isArray(imported)) {
           recipes = imported;
-          saveToStorage();
+          await saveToStorage();
           alert('Дані успішно імпортовано!');
         } else {
           alert('Невірний формат файлу!');
@@ -1049,11 +1126,11 @@
     XLSX.writeFile(workbook, `recipes_excel_${new Date().toISOString().slice(0,10)}.xlsx`);
   }
 
-  function importExcelData(e) {
+  async function importExcelData(e) {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(event) {
+    reader.onload = async function(event) {
       try {
         const data = new Uint8Array(event.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
@@ -1076,7 +1153,7 @@
               image: imgsArray[0] || ''
             };
           });
-          saveToStorage();
+          await saveToStorage();
           alert('Excel-дані успішно імпортовано!');
         } else {
           alert('Файл порожній або має некоректний формат!');
@@ -1088,8 +1165,13 @@
     reader.readAsArrayBuffer(file);
   }
 
-  updateCategories();
-  render();
+  // Запуск із завантаженням IndexedDB
+  initDB().then(async () => {
+    await migrateFromLocalStorage();
+    await loadRecipesFromDB();
+    updateCategories();
+    render();
+  });
 </script>
 </body>
 </html>
