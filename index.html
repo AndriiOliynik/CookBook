@@ -68,7 +68,7 @@
     
     button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; min-height: 40px; display: inline-flex; align-items: center; justify-content: center; }
     button:active { opacity: 0.85; }
-    button.btn-secondary { background: #007bff; }
+    button.btn-secondary { background: #007bff; color: white; }
     button.btn-excel { background: #1d6f42; }
     button.btn-danger { background: #dc3545; color: #fff; }
     button.btn-icon-danger { background: #fff0f0; color: #dc3545; border: 1px solid #ffcdd2; width: 36px; height: 36px; border-radius: 50%; padding: 0; font-size: 16px; }
@@ -225,7 +225,6 @@
     .modal-content { background: white; padding: 16px; border-radius: 12px; width: 100%; max-width: 480px; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
     .modal-header { display: flex; justify-content: space-between; align-items: center; }
 
-    /* Великі зручні кнопки закриття */
     .btn-close-large {
       background: rgba(0,0,0,0.06);
       border: none;
@@ -241,12 +240,47 @@
       min-height: auto;
       padding: 0;
     }
-    .btn-close-large:active { background: rgba(0,0,0,0.15); }
 
-    /* Поля зображень */
-    .image-fields-list { display: flex; flex-direction: column; gap: 8px; }
-    .image-field-item { display: flex; align-items: center; gap: 8px; background: #f8fafc; padding: 6px; border: 1px solid #e2e8f0; border-radius: 8px; }
-    .image-field-item img { width: 48px; height: 48px; object-fit: cover; border-radius: 6px; }
+    /* Поля зображень у модальних вікнах */
+    .image-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 4px;
+    }
+    .btn-add-img-icon {
+      width: 36px;
+      height: 36px;
+      min-height: 36px;
+      border-radius: 8px;
+      font-size: 16px;
+      padding: 0;
+      background: #e2e8f0;
+      color: #2d3748;
+      border: 1px solid #cbd5e0;
+    }
+    .image-fields-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px; }
+    .image-field-item { 
+      display: flex; 
+      flex-direction: column;
+      align-items: center; 
+      gap: 4px; 
+      background: #f8fafc; 
+      padding: 6px; 
+      border: 1px solid #e2e8f0; 
+      border-radius: 8px; 
+      position: relative;
+    }
+    .image-field-item img { width: 56px; height: 56px; object-fit: cover; border-radius: 6px; }
+    .image-field-actions { display: flex; gap: 4px; width: 100%; }
+    .btn-action-icon {
+      flex: 1;
+      height: 28px;
+      min-height: 28px;
+      padding: 0;
+      font-size: 13px;
+      border-radius: 4px;
+    }
 
     /* Лайтбокс з гортанням повного зображення */
     .image-viewer-modal { 
@@ -307,7 +341,6 @@
     .viewer-btn.prev { left: 12px; }
     .viewer-btn.next { right: 12px; }
 
-    /* Велика помітна кнопка закриття у лайтбоксі */
     .close-viewer-btn { 
       position: absolute; 
       top: 16px; 
@@ -325,7 +358,6 @@
       cursor: pointer; 
       z-index: 2200; 
     }
-    .close-viewer-btn:active { background: rgba(255, 255, 255, 0.4); }
 
     .floating-add-btn {
       position: fixed; 
@@ -395,23 +427,25 @@
       <h3>➕ Новий рецепт</h3>
       <button type="button" class="btn-close-large" onclick="closeModal('addModal')">✕</button>
     </div>
-    <form id="recipeForm" onsubmit="addRecipe(event)" style="display:flex; flex-direction:column; gap:8px;">
+    <div style="display:flex; flex-direction:column; gap:8px;">
       <input type="text" id="title" placeholder="Назва рецепту *" required>
       <input type="text" id="category" placeholder="Категорія">
       
-      <label style="font-size:12px; font-weight:bold; color:#555;">Картинки:</label>
+      <div class="image-section-header">
+        <label style="font-size:12px; font-weight:bold; color:#555;">Картинки:</label>
+        <button type="button" class="btn-add-img-icon" onclick="triggerMultipleImageSelect('add')" title="Додати картинку">➕📷</button>
+      </div>
       <div id="addImagesContainer" class="image-fields-list"></div>
-      <button type="button" class="btn-secondary" style="font-size:12px; min-height:32px;" onclick="addImageField('add')">📷 Додати картинку</button>
 
       <input type="text" id="link" placeholder="🔗 Посилання на джерело">
       <textarea id="content" placeholder="📝 Текст рецепту" rows="3"></textarea>
       <textarea id="description" placeholder="📌 Нотатки" rows="2"></textarea>
       
       <div style="display:flex; gap:8px; margin-top:6px;">
-        <button type="submit" style="flex:1;">Зберегти</button>
+        <button type="button" onclick="addRecipe()" style="flex:1;">Зберегти</button>
         <button type="button" class="btn-danger" style="flex:1;" onclick="closeModal('addModal')">Скасувати</button>
       </div>
-    </form>
+    </div>
   </div>
 </div>
 
@@ -425,26 +459,31 @@
         <button type="button" class="btn-close-large" onclick="closeModal('editModal')">✕</button>
       </div>
     </div>
-    <form id="editForm" onsubmit="saveEdit(event)" style="display:flex; flex-direction:column; gap:8px;">
+    <div style="display:flex; flex-direction:column; gap:8px;">
       <input type="hidden" id="editId">
       <input type="text" id="editTitle" placeholder="Назва *" required>
       <input type="text" id="editCategory" placeholder="Категорія">
       
-      <label style="font-size:12px; font-weight:bold; color:#555;">Картинки:</label>
+      <div class="image-section-header">
+        <label style="font-size:12px; font-weight:bold; color:#555;">Картинки:</label>
+        <button type="button" class="btn-add-img-icon" onclick="triggerMultipleImageSelect('edit')" title="Додати картинку">➕📷</button>
+      </div>
       <div id="editImagesContainer" class="image-fields-list"></div>
-      <button type="button" class="btn-secondary" style="font-size:12px; min-height:32px;" onclick="addImageField('edit')">📷 Додати картинку</button>
 
       <input type="text" id="editLink" placeholder="🔗 Посилання">
       <textarea id="editContent" placeholder="📝 Текст" rows="3"></textarea>
       <textarea id="editDescription" placeholder="📌 Нотатки" rows="2"></textarea>
       
       <div style="display:flex; gap:8px; margin-top:6px;">
-        <button type="submit" style="flex:1;">Зберегти</button>
+        <button type="button" onclick="saveEdit()" style="flex:1;">Зберегти</button>
         <button type="button" class="btn-danger" style="flex:1;" onclick="closeModal('editModal')">Скасувати</button>
       </div>
-    </form>
+    </div>
   </div>
 </div>
+
+<!-- Прихований елемент для вибору мультикартинок -->
+<input type="file" id="multiImageInput" accept="image/*" multiple style="display:none">
 
 <!-- Модальне вікно опису/нотаток -->
 <div id="descModal" class="modal">
@@ -492,15 +531,12 @@
     const modal = document.getElementById(modalId);
     if (!modal) return;
     
-    // Якщо якесь вікно вже було відкрите
     if (activeModalId && activeModalId !== modalId) {
       document.getElementById(activeModalId).style.display = 'none';
     }
 
     modal.style.display = 'flex';
     activeModalId = modalId;
-
-    // Додаємо запис в історію пристрою для перехоплення кнопки "Назад"
     history.pushState({ modalOpen: true, modalId: modalId }, '');
   }
 
@@ -512,7 +548,6 @@
       activeModalId = null;
     }
 
-    // Якщо закрили кліком (не через кнопка "Назад"), відкочуємо історію назад
     if (!isPopState && history.state && history.state.modalOpen) {
       history.back();
     }
@@ -563,6 +598,7 @@
     }
   }
 
+  /* ВІДОБРАЖЕННЯ ТА ОБРОБКА КАРТИНOК З МУЛЬТИВИБОРОМ */
   function renderImageFields(mode) {
     const container = document.getElementById(mode === 'add' ? 'addImagesContainer' : 'editImagesContainer');
     const imgs = mode === 'add' ? tempAddImages : tempEditImages;
@@ -573,29 +609,37 @@
       item.className = 'image-field-item';
       item.innerHTML = `
         <img src="${imgBase64}">
-        <input type="file" id="${mode}_file_${index}" accept="image/*" style="display:none" onchange="handleImageReplace(event, '${mode}', ${index})">
-        <button type="button" class="btn-secondary" style="font-size:11px; padding:4px 8px; min-height:30px;" onclick="document.getElementById('${mode}_file_${index}').click()">Замінити</button>
-        <button type="button" class="btn-danger" style="font-size:11px; padding:4px 8px; min-height:30px;" onclick="removeImageField('${mode}', ${index})">Видалити</button>
+        <input type="file" id="${mode}_replace_${index}" accept="image/*" style="display:none" onchange="handleImageReplace(event, '${mode}', ${index})">
+        <div class="image-field-actions">
+          <button type="button" class="btn-secondary btn-action-icon" onclick="document.getElementById('${mode}_replace_${index}').click()" title="Замінити">🔄</button>
+          <button type="button" class="btn-danger btn-action-icon" onclick="removeImageField('${mode}', ${index})" title="Видалити">🗑️</button>
+        </div>
       `;
       container.appendChild(item);
     });
   }
 
-  function addImageField(mode) {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (file) {
+  function triggerMultipleImageSelect(mode) {
+    const multiInput = document.getElementById('multiImageInput');
+    multiInput.value = '';
+    multiInput.onchange = (e) => {
+      const files = Array.from(e.target.files);
+      if (files.length === 0) return;
+
+      let processed = 0;
+      files.forEach((file) => {
         processImageFile(file, (base64) => {
           if (mode === 'add') tempAddImages.push(base64);
           else tempEditImages.push(base64);
-          renderImageFields(mode);
+          
+          processed++;
+          if (processed === files.length) {
+            renderImageFields(mode);
+          }
         });
-      }
+      });
     };
-    input.click();
+    multiInput.click();
   }
 
   function handleImageReplace(e, mode, index) {
@@ -681,20 +725,30 @@
   }
 
   function openAddModal() {
-    document.getElementById('recipeForm').reset();
+    document.getElementById('title').value = '';
+    document.getElementById('category').value = '';
+    document.getElementById('link').value = '';
+    document.getElementById('content').value = '';
+    document.getElementById('description').value = '';
     tempAddImages = [];
     renderImageFields('add');
     openModal('addModal');
   }
 
-  function addRecipe(e) {
-    e.preventDefault();
+  /* ДОДАВАННЯ ТА РЕДАГУВАННЯ БЕЗ ФОРМИ (НАДІЙНИЙ ЗБЕРЕЖЕННЯ) */
+  function addRecipe() {
+    const titleVal = document.getElementById('title').value.trim();
+    if (!titleVal) {
+      alert('Будь ласка, введіть назву рецепту!');
+      return;
+    }
+
     let rawLink = document.getElementById('link').value.trim();
     if (rawLink && !/^https?:\/\//i.test(rawLink)) rawLink = 'https://' + rawLink;
 
     recipes.push({
       id: Date.now().toString(),
-      title: document.getElementById('title').value,
+      title: titleVal,
       category: document.getElementById('category').value.trim() || 'Загальні',
       images: [...tempAddImages],
       image: tempAddImages[0] || "",
@@ -721,9 +775,14 @@
     openModal('editModal');
   }
 
-  function saveEdit(e) {
-    e.preventDefault();
+  function saveEdit() {
     const id = document.getElementById('editId').value;
+    const titleVal = document.getElementById('editTitle').value.trim();
+    if (!titleVal) {
+      alert('Будь ласка, введіть назву рецепту!');
+      return;
+    }
+
     const idx = recipes.findIndex(r => r.id === id);
     if (idx !== -1) {
       let rawLink = document.getElementById('editLink').value.trim();
@@ -731,7 +790,7 @@
 
       recipes[idx] = {
         id,
-        title: document.getElementById('editTitle').value,
+        title: titleVal,
         category: document.getElementById('editCategory').value.trim() || 'Загальні',
         images: [...tempEditImages],
         image: tempEditImages[0] || "",
