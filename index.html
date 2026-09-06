@@ -92,12 +92,11 @@
       overflow: hidden; 
       border: 1px solid #edf2f7; 
       width: 100%; 
-      aspect-ratio: 1 / 1;
       position: relative;
     }
 
     .card-header-box { 
-      padding: 6px 8px; 
+      padding: var(--card-padding, 6px 8px); 
       display: flex; 
       flex-direction: column; 
       gap: 2px; 
@@ -115,10 +114,11 @@
 
     .slider-container {
       position: relative;
-      flex: 1;
       width: 100%;
+      height: var(--img-height, 140px);
       background: #e9ecef;
       overflow: hidden;
+      flex-shrink: 0;
     }
     .slider-track {
       display: flex;
@@ -144,11 +144,11 @@
       background: rgba(0,0,0,0.35);
       color: white;
       border: none;
-      width: 22px;
-      height: 22px;
+      width: var(--btn-slider-size, 22px);
+      height: var(--btn-slider-size, 22px);
       border-radius: 50%;
       min-height: auto;
-      font-size: 12px;
+      font-size: var(--btn-slider-font, 12px);
       z-index: 5;
       padding: 0;
     }
@@ -157,7 +157,7 @@
     .no-img-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: #a0aec0; }
 
     .card-footer-box { 
-      padding: 6px 8px; 
+      padding: var(--card-padding, 6px 8px); 
       display: flex; 
       flex-direction: column; 
       gap: 4px; 
@@ -174,9 +174,9 @@
     }
 
     .btn-icon-only {
-      font-size: 13px;
-      height: 30px;
-      min-height: 30px;
+      font-size: var(--btn-icon-size, 13px);
+      height: var(--btn-height, 30px);
+      min-height: var(--btn-height, 30px);
       padding: 0;
       border-radius: 6px;
       flex: 1;
@@ -200,9 +200,9 @@
       justify-content: center; 
       font-weight: 600; 
       text-decoration: none; 
-      padding: 4px; 
+      padding: 3px; 
       border-radius: 6px; 
-      font-size: 10px; 
+      font-size: var(--link-font-size, 10px); 
       width: 100%; 
       white-space: nowrap;
       overflow: hidden;
@@ -241,7 +241,6 @@
       margin-top: 4px;
     }
 
-    /* Збільшена кнопка додавання картинки */
     .btn-add-img-card {
       width: 84px;
       height: 84px;
@@ -263,7 +262,6 @@
 
     .image-fields-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; align-items: center; }
     
-    /* Збільшена картка мініатюри у модалці */
     .image-field-item { 
       display: flex; 
       flex-direction: column;
@@ -279,7 +277,6 @@
     .image-field-item img { width: 74px; height: 74px; object-fit: cover; border-radius: 6px; }
     .image-field-actions { display: flex; gap: 4px; width: 100%; justify-content: center; }
     
-    /* Кнопки переміщення (стрілочки) поверх зображення у верхніх кутах */
     .btn-move-top {
       position: absolute;
       top: 6px;
@@ -508,7 +505,6 @@
   </div>
 </div>
 
-<!-- Прихований елемент для вибору мультикартинок -->
 <input type="file" id="multiImageInput" accept="image/*" multiple style="display:none">
 
 <!-- Модальне вікно опису/нотаток -->
@@ -599,14 +595,44 @@
   function changeGridColumns(cols) {
     const root = document.documentElement;
     root.style.setProperty('--cols-count', cols);
+    
+    // Пропорційне зменшення кнопок та параметрів відображення картинок
     if (cols >= 4) {
-      root.style.setProperty('--card-title-size', '11px');
+      root.style.setProperty('--card-title-size', '10px');
+      root.style.setProperty('--img-height', '80px');
+      root.style.setProperty('--btn-height', '22px');
+      root.style.setProperty('--btn-icon-size', '10px');
+      root.style.setProperty('--card-padding', '3px 4px');
+      root.style.setProperty('--btn-slider-size', '16px');
+      root.style.setProperty('--btn-slider-font', '9px');
+      root.style.setProperty('--link-font-size', '8px');
     } else if (cols == 3) {
-      root.style.setProperty('--card-title-size', '12px');
+      root.style.setProperty('--card-title-size', '11px');
+      root.style.setProperty('--img-height', '105px');
+      root.style.setProperty('--btn-height', '25px');
+      root.style.setProperty('--btn-icon-size', '11px');
+      root.style.setProperty('--card-padding', '4px 5px');
+      root.style.setProperty('--btn-slider-size', '18px');
+      root.style.setProperty('--btn-slider-font', '10px');
+      root.style.setProperty('--link-font-size', '9px');
     } else if (cols == 2) {
       root.style.setProperty('--card-title-size', '13px');
+      root.style.setProperty('--img-height', '140px');
+      root.style.setProperty('--btn-height', '30px');
+      root.style.setProperty('--btn-icon-size', '13px');
+      root.style.setProperty('--card-padding', '6px 8px');
+      root.style.setProperty('--btn-slider-size', '22px');
+      root.style.setProperty('--btn-slider-font', '12px');
+      root.style.setProperty('--link-font-size', '10px');
     } else {
-      root.style.setProperty('--card-title-size', '15px');
+      root.style.setProperty('--card-title-size', '16px');
+      root.style.setProperty('--img-height', '220px');
+      root.style.setProperty('--btn-height', '36px');
+      root.style.setProperty('--btn-icon-size', '15px');
+      root.style.setProperty('--card-padding', '8px 10px');
+      root.style.setProperty('--btn-slider-size', '26px');
+      root.style.setProperty('--btn-slider-font', '14px');
+      root.style.setProperty('--link-font-size', '11px');
     }
     localStorage.setItem('grid_cols', cols);
   }
@@ -951,7 +977,6 @@
         if (info) linkHtml = `<a href="${r.link}" target="_blank" class="social-link ${info.class}">${info.label}</a>`;
       }
 
-      // Кнопки завжди додаються; якщо дані відсутні — вони у стані disabled
       const descDisabled = !r.content ? 'disabled' : '';
       const notesDisabled = !r.description ? 'disabled' : '';
 
@@ -1063,7 +1088,6 @@
     reader.readAsArrayBuffer(file);
   }
 
-  // Початкова ініціалізація
   updateCategories();
   render();
 </script>
