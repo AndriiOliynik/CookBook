@@ -950,19 +950,19 @@
   function exportExcelData() {
     if (!recipes.length) return alert('Немає рецептів!');
     const excelRows = recipes.map(r => ({
-      ID: r.id, 
-      Назва: r.title, 
-      Категорія: r.category, 
-      Посилання: r.link || '', 
-      Текст_Рецепту: r.content || '', 
-      Нотатки: r.description || '',
-      Зображення: (r.images || []).join('||')
+      ID: r.id,
+      Назва: r.title,
+      Категорія: r.category,
+      Посилання: r.link,
+      Опис: r.content,
+      Нотатки: r.description,
+      Зображення: (r.images || []).join(';')
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(excelRows);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Рецепти");
-    XLSX.writeFile(workbook, `recipes_backup_${new Date().toISOString().slice(0,10)}.xlsx`);
+    XLSX.writeFile(workbook, `recipes_excel_${new Date().toISOString().slice(0,10)}.xlsx`);
   }
 
   function importExcelData(e) {
@@ -977,36 +977,36 @@
         const worksheet = workbook.Sheets[firstSheetName];
         const json = XLSX.utils.sheet_to_json(worksheet);
 
-        recipes = json.map(item => {
-          let imgs = [];
-          if (item['Зображення']) {
-            imgs = item['Зображення'].split('||');
-          }
-          return {
-            id: String(item['ID'] || Date.now()),
-            title: item['Назва'] || 'Без назви',
-            category: item['Категорія'] || 'Загальні',
-            link: item['Посилання'] || '',
-            content: item['Текст_Рецепту'] || '',
-            description: item['Нотатки'] || '',
-            images: imgs,
-            image: imgs[0] || ''
-          };
-        });
-
-        saveToStorage();
-        alert('Дані з Excel успішно завантажено!');
+        if (Array.isArray(json) && json.length > 0) {
+          recipes = json.map((item, idx) => {
+            const rawImgs = item['Зображення'] || item['Images'] || '';
+            const imgsArray = typeof rawImgs === 'string' && rawImgs.length > 0 ? rawImgs.split(';') : [];
+            return {
+              id: String(item['ID'] || Date.now() + idx),
+              title: item['Назва'] || item['Title'] || 'Без назви',
+              category: item['Категорія'] || item['Category'] || 'Загальні',
+              link: item['Посилання'] || item['Link'] || '',
+              content: item['Опис'] || item['Content'] || '',
+              description: item['Нотатки'] || item['Description'] || '',
+              images: imgsArray,
+              image: imgsArray[0] || ''
+            };
+          });
+          saveToStorage();
+          alert('Excel-дані успішно імпортовано!');
+        } else {
+          alert('Файл порожній або має некоректний формат!');
+        }
       } catch (err) {
-        alert('Помилка зчитування Excel файлу!');
+        alert('Помилка імпорту Excel файлу!');
       }
     };
     reader.readAsArrayBuffer(file);
   }
 
-  // Початковий рендер
+  // Початкова ініціалізація
   updateCategories();
   render();
 </script>
-
 </body>
 </html>
