@@ -656,14 +656,13 @@
     renderImageFields(mode);
   }
 
-  /* ВИПРАВЛЕНО: Агресивне стиснення фотографій для економії пам'яті */
   function processImageFile(file, callback) {
     const reader = new FileReader();
     reader.onload = function(e) {
       const img = new Image();
       img.onload = function() {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 600; // Зменшено з 1000 до 600px для мобільних пристроїв
+        const MAX_WIDTH = 600;
         let width = img.width;
         let height = img.height;
 
@@ -676,7 +675,6 @@
         canvas.height = height;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, width, height);
-        // Стиснення до 0.5 різко зменшує розмір файлу без втрати чіткості на екрані
         callback(canvas.toDataURL('image/jpeg', 0.5));
       };
       img.src = e.target.result;
@@ -741,7 +739,6 @@
     openModal('addModal');
   }
 
-  /* ВИПРАВЛЕНО: Надійне зчитування полів та обробка лімітів пам'яті */
   function addRecipe() {
     const titleInput = document.getElementById('title');
     const titleVal = titleInput ? titleInput.value.trim() : '';
@@ -770,7 +767,6 @@
     if (saveToStorage()) {
       closeModal('addModal');
     } else {
-      // Якщо не збереглося через переповнення сховища - видаляємо останній з масиву
       recipes.pop();
     }
   }
@@ -832,7 +828,6 @@
     }
   }
 
-  /* ВИПРАВЛЕНО: Перевірка помилки QuotaExceededError у localStorage */
   function saveToStorage() {
     try {
       localStorage.setItem('my_recipes', JSON.stringify(recipes));
@@ -931,6 +926,27 @@
     a.click();
   }
 
+  function importData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (Array.isArray(imported)) {
+          recipes = imported;
+          saveToStorage();
+          alert('Дані успішно імпортовано!');
+        } else {
+          alert('Невірний формат файлу!');
+        }
+      } catch (err) {
+        alert('Помилка зчитування JSON!');
+      }
+    };
+    reader.readAsText(file);
+  }
+
   function exportExcelData() {
     if (!recipes.length) return alert('Немає рецептів!');
     const excelRows = recipes.map(r => ({
@@ -939,96 +955,58 @@
       Категорія: r.category, 
       Посилання: r.link || '', 
       Текст_Рецепту: r.content || '', 
-      Нотатки: r.description || ''
+      Нотатки: r.description || '',
+      Зображення: (r.images || []).join('||')
     }));
+
     const worksheet = XLSX.utils.json_to_sheet(excelRows);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Рецепти");
-    const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'base64' });
-    const a = document.createElement('a');
-    a.href = "data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64," + wbout;
-    a.download = `recipes_backup_${new Date().toISOString().slice(0,10)}.xlsx`;
-    a.click();
-  }
-
-  function importData(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = function(evt) {
-      try {
-        let imported = JSON.parse(evt.target.result);
-        if (!Array.isArray(imported)) imported = [imported];
-        
-        imported.forEach(item => {
-          const title = item.title || item.name || item.Title || '';
-          if (title) {
-            let imgs = item.images || [];
-            if (!imgs.length && (item.image || item.img)) imgs = [item.image || item.img];
-            recipes.push({
-              id: Date.now().toString() + Math.random().toString(36).substr(2, 4),
-              title: title.toString().trim(),
-              category: (item.category || item.Category || 'Загальні').toString().trim(),
-              images: imgs,
-              image: imgs[0] || '',
-              link: (item.link || item.url || '').toString().trim(),
-              content: (item.content || item.text || '').toString().trim(),
-              description: (item.description || item.notes || '').toString().trim()
-            });
-          }
-        });
-        saveToStorage();
-        alert('Імпорт завершено!');
-      } catch (err) { alert('Помилка JSON файлу'); }
-      e.target.value = '';
-    };
-    reader.readAsText(file, "UTF-8");
+    XLSX.writeFile(workbook, `recipes_backup_${new Date().toISOString().slice(0,10)}.xlsx`);
   }
 
   function importExcelData(e) {
     const file = e.target.files[0];
-    if (!file || typeof XLSX === 'undefined') return;
+    if (!file) return;
     const reader = new FileReader();
-    reader.onload = function(evt) {
+    reader.onload = function(event) {
       try {
-        const data = new Uint8Array(evt.target.result);
+        const data = new Uint8Array(event.target.result);
         const workbook = XLSX.read(data, { type: 'array' });
-        const excelRows = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]], { defval: "" });
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        const json = XLSX.utils.sheet_to_json(worksheet);
 
-        excelRows.forEach(row => {
-          const getVal = (keys) => {
-            for (let k of keys) {
-              const found = Object.keys(row).find(rk => rk.trim().toLowerCase() === k.toLowerCase());
-              if (found && row[found]) return row[found];
-            }
-            return '';
-          };
-          const title = getVal(['title', 'назва', 'рецепт']);
-          if (title) {
-            const singleImg = getVal(['image', 'фото']).toString().trim();
-            const imgs = singleImg ? [singleImg] : [];
-            recipes.push({
-              id: Date.now().toString() + Math.random().toString(36).substr(2, 4),
-              title: title.toString().trim(),
-              category: getVal(['category', 'категорія']) || 'Загальні',
-              images: imgs,
-              image: singleImg,
-              link: getVal(['link', 'посилання']).toString().trim(),
-              content: getVal(['content', 'текст', 'текст_рецепту']).toString().trim(),
-              description: getVal(['description', 'нотатки', 'опис']).toString().trim()
-            });
+        recipes = json.map(item => {
+          let imgs = [];
+          if (item['Зображення']) {
+            imgs = item['Зображення'].split('||');
           }
+          return {
+            id: String(item['ID'] || Date.now()),
+            title: item['Назва'] || 'Без назви',
+            category: item['Категорія'] || 'Загальні',
+            link: item['Посилання'] || '',
+            content: item['Текст_Рецепту'] || '',
+            description: item['Нотатки'] || '',
+            images: imgs,
+            image: imgs[0] || ''
+          };
         });
+
         saveToStorage();
-        alert('Імпорт Excel завершено!');
-      } catch (err) { alert('Помилка імпорту Excel'); }
-      e.target.value = '';
+        alert('Дані з Excel успішно завантажено!');
+      } catch (err) {
+        alert('Помилка зчитування Excel файлу!');
+      }
     };
     reader.readAsArrayBuffer(file);
   }
 
+  // Початковий рендер
   updateCategories();
   render();
 </script>
+
 </body>
 </html>
